@@ -1,0 +1,35 @@
+
+obj/$(PLATFORM)/boot.o: $(BOOT)
+	mkdir -p `dirname $@`
+	$(AS) $^ -o $@ $(ASFLAGS)
+
+obj/$(PLATFORM)/%.o: src/%.s
+	mkdir -p `dirname $@`
+	$(AS) $^ -o $@ $(ASFLAGS)
+
+obj/$(PLATFORM)/%.o: src/%.c
+	mkdir -p `dirname $@`
+	$(CC) -c $^ -o $@ $(CFLAGS)
+
+obj/$(PLATFORM)/kernel.elf: obj/$(PLATFORM)/boot.o obj/$(PLATFORM)/kernel.o
+	mkdir -p `dirname $@`
+	$(CC) -T$(LDSCRIPT) -o $@ $^ $(LDFLAGS)
+
+obj/$(PLATFORM)/kernel.bin: obj/$(PLATFORM)/kernel.elf
+	mkdir -p `dirname $@`
+	objcopy -Obinary $< $@
+
+ifdef NEEDFAT
+bin/$(PLATFORM)/$(DISKFILE): obj/$(PLATFORM)/kernel.bin
+	mkdir -p `dirname $@`
+	mformat -C -i $@ -B $< $(FORMATFLAGS)
+	dd if=$< of=$@ bs=512 seek=1 skip=1 conv=notrunc
+	$(FIXIMAGE) $@
+else
+bin/$(PLATFORM)/$(DISKFILE): obj/$(PLATFORM)/kernel.bin
+	mkdir -p `dirname $@`
+	dd if=/dev/zero of=$@ bs=512 count=$(DISKSIZE)
+	dd if=$< of=$@ bs=512 conv=notrunc
+	$(FIXIMAGE) $@
+endif
+

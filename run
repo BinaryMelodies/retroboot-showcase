@@ -1,0 +1,58 @@
+#! /bin/sh
+if [ "$1" == "16" -o "$1" == "rm" -o "$1" == "86" ]
+then
+	qemu-system-i386 -fda bin/pc86/disk.img
+elif [ "$1" == "pm" -o "$1" == "286" ]
+then
+	qemu-system-i386 -fda bin/pc286/disk.img
+elif [ "$1" == "32" -o "$1" == "386" ]
+then
+	qemu-system-i386 -fda bin/pc386/disk.img
+elif [ "$1" == "64" -o "$1" == "x64" ]
+then
+	qemu-system-x86_64 -fda bin/pc64/disk.img
+elif [ "$1" == "mda" ]
+then
+	if [ "$2" == "16" -o "$2" == "rm" -o "$2" == "86" ]
+	then
+		dosbox-x --set machine=mda -c "boot bin/pc86/disk.img"
+	elif [ "$2" == "pm" -o "$2" == "286" ]
+	then
+		dosbox-x --set machine=mda -c "boot bin/pc286/disk.img"
+	elif [ "$2" == "32" -o "$2" == "386" ]
+	then
+		dosbox-x --set machine=mda -c "boot bin/pc386/disk.img"
+	fi
+elif [ "$1" == "cga" ]
+then
+	if [ "$2" == "16" -o "$2" == "rm" -o "$2" == "86" ]
+	then
+		dosbox-x --set machine=cga -c "boot bin/pc86/disk.img"
+	elif [ "$2" == "pm" -o "$2" == "286" ]
+	then
+		dosbox-x --set machine=cga -c "boot bin/pc286/disk.img"
+	elif [ "$2" == "32" -o "$2" == "386" ]
+	then
+		dosbox-x --set machine=cga -c "boot bin/pc386/disk.img"
+	fi
+elif [ "$1" == "pc98" ]
+then
+	if [ "$2" == "16" -o "$2" == "rm" -o "$2" == "86" ]
+	then
+		dosbox-x --set machine=pc98 -c "boot bin/pc98/disk.img"
+	elif [ "$2" == "pm" -o "$2" == "286" ]
+	then
+		dosbox-x --set machine=pc98 -c "boot bin/pc98_286/disk.img"
+	elif [ "$2" == "32" -o "$2" == "386" ]
+	then
+		dosbox-x --set machine=pc98 -c "boot bin/pc98_386/disk.img"
+	fi
+elif [ "$1" == "atari" -o "$1" == "st" ]
+then
+	hatari bin/atari/disk.st
+elif [ "$1" == "x68000" -o "$1" == "x68k" -o "$1" == "sharp" -o "$1" == "xdf" ]
+then
+	px68k bin/x68000/disk.xdf
+else
+	echo "Invalid architecture"
+fi
