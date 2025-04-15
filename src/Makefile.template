@@ -28,7 +28,7 @@ bin/$(PLATFORM)/$(DISKFILE): obj/$(PLATFORM)/kernel.bin
 else
 bin/$(PLATFORM)/$(DISKFILE): obj/$(PLATFORM)/kernel.bin
 	mkdir -p `dirname $@`
-	dd if=/dev/zero of=$@ bs=512 count=$(DISKSIZE)
+	dd if=/dev/zero of=$@ bs=1024 count=$(DISKSIZE)
 	dd if=$< of=$@ bs=512 conv=notrunc
 	$(FIXIMAGE) $@
 endif

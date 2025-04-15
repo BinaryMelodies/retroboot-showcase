@@ -43,6 +43,8 @@
 # define SYSNAME "Atari ST"
 #elif defined X68000
 # define SYSNAME "Sharp X68000"
+#elif defined AMIGA
+# define SYSNAME "Commodore Amiga"
 #endif
 
 #if __ia16__ || __i386__ || __amd64__
@@ -1300,7 +1302,7 @@ noreturn void kmain(void)
 	screen_putstr("This line will be erased\n");
 	screen_puthex((size_t)kmain);
 	screen_putstr("\n");
-	screen_putstr("Greetings! " OSNAME " for the " SYSNAME COMMENT);
+	screen_putstr("Greetings! " OSNAME " for " SYSNAME COMMENT);
 	screen_putstr("\n");
 	screen_puthex((size_t)0x1A2B3C4D);
 #if !__m68k__ // TODO: 68000 pcrel modsi3 does not work
@@ -1312,9 +1314,6 @@ noreturn void kmain(void)
 
 #if __X86__
 #if OS286 || OS386 || OS64
-//screen_init();
-//screen_puthex(gdt[SEL_TSS / 8].segment.access);
-//for(;;);
 	enter_usermode();
 #endif
 
