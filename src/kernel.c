@@ -45,6 +45,8 @@
 # define SYSNAME "Sharp X68000"
 #elif defined AMIGA
 # define SYSNAME "Commodore Amiga"
+#elif defined MACINTOSH
+# define SYSNAME "Apple Macintosh"
 #endif
 
 #if __ia16__ || __i386__ || __amd64__
@@ -104,7 +106,14 @@ descriptor64_t idt[256];
 #endif
 
 #if USE_VGA_EMULATION
-static uint8_t screen_buffer[SCREEN_WIDTH * SCREEN_HEIGHT * 2];
+# ifndef SCREEN_WIDTH_MAX
+#  define SCREEN_WIDTH_MAX SCREEN_WIDTH
+# endif
+# ifndef SCREEN_HEIGHT_MAX
+#  define SCREEN_HEIGHT_MAX SCREEN_HEIGHT
+# endif
+
+static uint8_t screen_buffer[SCREEN_WIDTH_MAX * SCREEN_HEIGHT_MAX * 2];
 
 static inline void screen_init_palette(void)
 {
@@ -119,6 +128,7 @@ static inline void screen_init_palette(void)
 	}
 }
 
+#if !screen_drawchar_defined
 static inline void screen_drawchar(int x, int y, int c, int a)
 {
 	char * address = screen_get_memory_base(x, y);
@@ -151,6 +161,7 @@ static inline void screen_drawchar(int x, int y, int c, int a)
 		}
 	}
 }
+#endif
 
 static inline void screen_setchar(uint8_t c)
 {

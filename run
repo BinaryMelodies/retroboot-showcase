@@ -58,6 +58,18 @@ then
 	else
 		fs-uae bin/amiga/disk.adf
 	fi
+elif [ "$1" == "mac" ]
+then
+	if [ "$2" == "plus" ]
+	then
+		Mini\ vMac bin/mac/disk.400
+	elif [ "$2" == "ii" ]
+	then
+		Mini\ vMac\ 26 bin/mac/disk.400
+	else
+		# 128k
+		Mini\ vMac\ 20 bin/mac/disk.400
+	fi
 else
 	echo "Invalid architecture"
 fi
