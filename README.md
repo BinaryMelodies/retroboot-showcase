@@ -30,13 +30,16 @@ The following tools are required for compilation:
 * Mtools (to generate BIOS parameter block)
 * Python 3 (to make disk image bootable)
 * Due to copyright restrictions, fonts cannot be shared in this repository. The files `src/font8x8.h` and `src/font8x16.h` must be provided by the user for proper functioning of the system. These files contain a byte array called `font8x8` and `font8x16`, each byte representing a row of the bitmap corresponding to each character in the font. A sample format for these files is as follows:
-        #ifndef _FONT8X8_H
-        #define _FONT8X8_H
-        static const uint8_t font8x8[256 * 8] = {
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ...
-        };
-        #endif // _FONT8X8_H
+
+```c
+#ifndef _FONT8X8_H
+#define _FONT8X8_H
+static const uint8_t font8x8[256 * 8] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    ...
+};
+#endif // _FONT8X8_H
+```
 
 # Execution
 
