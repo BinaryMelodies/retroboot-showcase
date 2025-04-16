@@ -1316,7 +1316,7 @@ noreturn void kmain(void)
 	screen_putstr("Greetings! " OSNAME " for " SYSNAME COMMENT);
 	screen_putstr("\n");
 	screen_puthex((size_t)0x1A2B3C4D);
-#if !__m68k__ // TODO: 68000 pcrel modsi3 does not work
+#if !ATARI // TODO: 68000 pcrel modsi3 does not work
 	screen_putdec(-12345);
 #endif
 	screen_putstr("\n");
