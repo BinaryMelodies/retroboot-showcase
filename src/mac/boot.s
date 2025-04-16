@@ -46,7 +46,7 @@ _start:
 	move.l	#stack_top, %sp
 	# Clear out bss
 	move.l	#bss_start, %a0
-	move.l	#bss_size, %d0
+	move.l	#bss_size - 4, %d0
 	lsr.l	#2, %d0
 4:
 	clr.l	(%a0)+

@@ -40,7 +40,7 @@ _start:
 2:
 	# clear out bss
 	move.l	#bss_start, %a0
-	move.l	#bss_size, %d0
+	move.l	#bss_size - 4, %d0
 	lsr.l	#2, %d0
 3:
 	clr.l	(%a0)+
