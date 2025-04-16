@@ -38,32 +38,29 @@ static inline void screen_init_palette(void);
 
 static inline void screen_setpalette(int c, uint8_t r, uint8_t g, uint8_t b)
 {
+	(void) c;
+	(void) r;
+	(void) g;
+	(void) b;
 	// TODO
 }
 
 static inline void screen_video_clear(void)
 {
-	// TODO: more colors
 	uint8_t pattern;
-	switch(screen_depth)
-	{
-	case 1:
-		pattern = (screen_attribute & 1) != 0 ? 0x00 : 0xFF;
-		for(int i = 0; i < screen_width * screen_height / 8; i++)
-			ScrnBase[i] = pattern;
-		break;
-	case 8:
-		pattern = (screen_attribute & 1) != 0 ? 0x00 : 0xFF;
-		for(int i = 0; i < screen_width * screen_height; i++)
-			ScrnBase[i] = pattern;
-		break;
-	}
+	pattern = (screen_attribute & 1) != 0 ? 0x00 : 0xFF;
+	for(int i = 0; i < ScreenRow * screen_height; i++)
+		ScrnBase[i] = pattern;
 }
 
 static inline void screen_video_scroll(int count)
 {
-	(void) count;
-	// TODO
+	memcpy(ScrnBase, &ScrnBase[ScreenRow * FONT_HEIGHT * count], ScreenRow * FONT_HEIGHT * (SCREEN_HEIGHT - count));
+
+	uint8_t pattern;
+	pattern = (screen_attribute & 1) != 0 ? 0x00 : 0xFF;
+	for(int i = ScreenRow * FONT_HEIGHT * (SCREEN_HEIGHT - count); i < ScreenRow * FONT_HEIGHT * SCREEN_HEIGHT; i++)
+		ScrnBase[i] = pattern;
 }
 
 static inline void screen_video_move_cursor(void)
@@ -83,7 +80,7 @@ static inline void screen_init(void)
 	screen_depth = ScreenRow * 8 / screen_width;
 
 	//screen_init_palette();
-//	screen_clear();
+	screen_clear();
 }
 
 static inline char * screen_get_memory_base(uint8_t x, uint8_t y)
@@ -94,11 +91,15 @@ static inline char * screen_get_memory_base(uint8_t x, uint8_t y)
 		return (char *)ScrnBase + ((x * FONT_WIDTH) >> 3) + (y * FONT_HEIGHT) * ScreenRow;
 	case 8:
 		return (char *)ScrnBase + x * FONT_WIDTH + (y * FONT_HEIGHT) * ScreenRow;
+	default:
+		// invalid
+		return 0;
 	}
 }
 
 static inline size_t screen_get_memory_offset(uint8_t channel, uint8_t line)
 {
+	(void) channel;
 	return ScreenRow * line;
 }
 
@@ -143,6 +144,9 @@ static inline void screen_drawchar(int x, int y, int c, int a)
 			for(int j = 0; j < 8; j++)
 				address[screen_get_memory_offset(0, i) + j] = ((pattern >> (7 - j)) & 1) != 0 ? 0x00 : 0xFF;
 			break;
+		default:
+			// invalid
+			return;
 		}
 	}
 }
