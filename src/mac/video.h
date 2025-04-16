@@ -79,6 +79,11 @@ static inline void screen_init(void)
 	JScrnSize(screen_width, screen_height);
 	screen_depth = ScreenRow * 8 / screen_width;
 
+	if(screen_width > SCREEN_WIDTH_MAX * FONT_WIDTH)
+		screen_width = SCREEN_WIDTH_MAX * FONT_WIDTH;
+	if(screen_height > SCREEN_HEIGHT_MAX * FONT_HEIGHT)
+		screen_height = SCREEN_HEIGHT_MAX * FONT_HEIGHT;
+
 	//screen_init_palette();
 	screen_clear();
 }
@@ -118,27 +123,24 @@ static inline void screen_drawchar(int x, int y, int c, int a)
 		switch(screen_depth)
 		{
 		case 1:
-			pattern = ~pattern; // TODO: this can be removed when palettes can be fixed (maybe only for color Macs?)
-			for(int ch = 0; ch < 4; ch++)
+			;
+			int p = (a & 1) | ((a >> (4 - 1)) & 2);
+			switch(p)
 			{
-				int p = ((a >> ch) & 1) | ((a >> (4 + ch - 1)) & 2);
-				switch(p)
-				{
-				case 0:
-					p = 0;
-					break;
-				case 1:
-					p = pattern;
-					break;
-				case 2:
-					p = ~pattern;
-					break;
-				case 3:
-					p = 0xFF;
-					break;
-				}
-				address[screen_get_memory_offset(ch, i)] = p;
+			case 0:
+				p = 0;
+				break;
+			case 1:
+				p = pattern;
+				break;
+			case 2:
+				p = ~pattern;
+				break;
+			case 3:
+				p = 0xFF;
+				break;
 			}
+			address[screen_get_memory_offset(0, i)] = p;
 			break;
 		case 8:
 			for(int j = 0; j < 8; j++)
