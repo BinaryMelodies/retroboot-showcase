@@ -1,6 +1,7 @@
 
 #include "i8259.c"
 #include "i8253.c"
+#include "keyboard.c"
 
 #if OS286 || OS386 || OS64
 enum
@@ -660,6 +661,7 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 }
 
 static inline void timer_interrupt_handler(registers_t * registers);
+static inline void keyboard_interrupt_handler(registers_t * registers);
 
 void interrupt_handler(registers_t * registers)
 {
@@ -702,6 +704,11 @@ void interrupt_handler(registers_t * registers)
 #if defined IBMPC || defined NECPC98
 	case IRQ0 + 0: // timer interrupt
 		timer_interrupt_handler(registers);
+		break;
+#endif
+#if defined IBMPC || defined NECPC98
+	case IRQ0 + 1: // keyboard interrupt
+		keyboard_interrupt_handler(registers);
 		break;
 #endif
 	}
@@ -786,6 +793,22 @@ static inline void timer_interrupt_handler(registers_t * registers)
 	screen_attribute = 0xE1; // white on black
 #endif
 	screen_putchar("/-\\|"[timer_tick & 3]);
+}
+
+static inline void keyboard_interrupt_handler(registers_t * registers)
+{
+	(void) registers;
+
+	uint8_t scancode = keyboard_interrupt_process();
+
+	screen_x = SCREEN_WIDTH - 2;
+	screen_y = 1;
+#if defined IBMPC
+	screen_attribute = 0x2F; // white on blue
+#elif defined NECPC98
+	screen_attribute = 0x25; // black on blue
+#endif
+	screen_puthex(scancode);
 }
 
 static inline void setup_tables(void)

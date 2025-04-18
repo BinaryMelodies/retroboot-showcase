@@ -307,6 +307,15 @@ noreturn void kmain(void)
 #endif
 
 	for(;;)
-		;
+	{
+#if __ia16__ || __i386__ || __amd64__
+		screen_putchar(keyboard_getch());
+		if(screen_y == SCREEN_HEIGHT - 1)
+		{
+			screen_scroll(1);
+			screen_y --;
+		}
+#endif
+	}
 }
 
