@@ -1,6 +1,6 @@
 SECTIONS
 {
-	. = 0x7C00;
+	. = 0x5000;
 	image_start = .;
 	.text :
 	{

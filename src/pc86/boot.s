@@ -81,29 +81,35 @@ _start:
 	.endr
 
 1:
+	# Set up stack at 0x1000
+	xorw	%ax, %ax
+	movw	%ax, %ss
+	movw	$0x1000, %sp
+
+	# Move boot sector to 0:0x5000
+.if IBMPC
+	# From 0x7C00
+	xorw	%ax, %ax
+	movw	%ax, %ds
+	movw	$0x7C00, %si
+	movw	%ax, %es
+.endif
+
 .if NECPC98
-	# Move boot sector from 0x1FE0:0 (or 0x1FC0:0) to 0:0x7C00
+	# Move boot sector from 0x7C00 (IBM PC) or 0x1FE0:0 (or 0x1FC0:0) (NEC PC-98) to 0:0x5000
 	movw	%cs, %ax
 	movw	%ax, %ds
-	xorw	%ax, %ax
-	movw	%ax, %es
 	xorw	%si, %si
-	movw	$0x7C00, %di
+	movw	%si, %es
+.endif
+
+	movw	$0x5000, %di
 	movw	$0x100, %cx
 	rep movsw
 	ljmp	$0, $2f
 2:
-.endif
-.if IBMPC
-	# Clear CS, some BIOSes jump to a different address than 0:0x7C00 but the same memory location
-	ljmp	$0, $2f
-2:
-.endif
-	# Set up stack right below boot code
-	xorw	%ax, %ax
-	movw	%ax, %ss
-	movw	$_start, %sp
 	# Make DS = CS for easier access
+	movw	%cs, %ax
 	movw	%ax, %ds
 	movw	%ax, %es
 
