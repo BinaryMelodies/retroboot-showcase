@@ -286,14 +286,12 @@ noreturn void kmain(void)
 
 	test_long_line();
 	test_puthex();
-#if !ATARI
+#if !ATARI // TODO: 68000 pcrel modsi3 does not work
 	test_putdec();
 #endif
 
-#if __ia16__ || __i386__ || __amd64__
-#if OS286 || OS386 || OS64
+#if !__m68k__ // TODO: this does not work yet
 	enter_usermode();
-#endif
 #endif
 
 	if(is_system_mode())

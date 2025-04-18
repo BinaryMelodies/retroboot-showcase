@@ -687,8 +687,6 @@ void interrupt_handler(registers_t * registers)
 	screen_video_move_cursor();
 }
 
-
-#if !OS86
 static inline void enter_usermode(void)
 {
 #if OS286
@@ -745,7 +743,6 @@ static inline void enter_usermode(void)
 	movl	%%eax, %%gs\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
 #endif
 }
-#endif
 
 static inline void setup_tables(void)
 {

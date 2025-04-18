@@ -21,3 +21,14 @@ static inline bool is_system_mode(void)
 #endif
 }
 
+#if !__ia16__ && !__i386__ && !__amd64__ // defined in x86.c
+static inline void enter_usermode(void)
+{
+#if __m68k__
+	asm volatile("\
+	move.l	%usp, %sp\n\
+	andi.w	#0xDFFF, %sr");
+#endif
+}
+#endif
+
