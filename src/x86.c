@@ -1,4 +1,56 @@
 
+#if OS286 || OS386 || OS64
+enum
+{
+	SEL_KERNEL_CS = 0x08,
+	SEL_KERNEL_SS = 0x10, // must follow CS for SYSENTER and SYSCALL
+#if OS286
+	SEL_KERNEL_SCREEN = 0x18,
+	SEL_KERNEL_SEGMENT1 = 0x20, // used as source segment for huge transfers
+	SEL_KERNEL_SEGMENT2 = 0x28, // used as destination segment for huge transfers
+	SEL_TSS = 0x30,
+	SEL_LDT = 0x38,
+	SEL_GDT_MAX = 0x40,
+
+	SEL_CALL7 = 0x04,
+	SEL_USER_CS = 0x0C,
+	SEL_USER_SS = 0x14,
+	SEL_LDT_MAX = 0x18,
+#elif OS386
+	SEL_USER_CS = 0x18, // must follow CS/SS for SYSEXIT
+	SEL_USER_SS = 0x20, // must follow CS/SS for SYSEXIT
+	SEL_TSS = 0x28,
+	SEL_LDT = 0x30,
+	SEL_GDT_MAX = 0x38,
+
+	SEL_CALL7 = 0x04,
+	SEL_LDT_MAX = 0x08,
+#elif OS64
+	SEL_USER_CS32 = 0x18, // must follow CS/SS for SYSEXIT
+	SEL_USER_SS32 = 0x20, // must follow CS/SS for SYSEXIT
+	SEL_USER_CS = 0x28, // must follow CS/SS for SYSEXIT and CS32/SS32 for SYSCALL
+	SEL_USER_SS = 0x30, // must follow CS/SS for SYSEXIT
+	SEL_TSS = 0x38, // takes up 2 slots
+	SEL_LDT = 0x48, // takes up 2 slots
+	SEL_GDT_MAX = 0x58,
+
+	SEL_CALL7 = 0x04,
+	SEL_LDT_MAX = 0x08,
+#endif
+};
+
+descriptor_t gdt[SEL_GDT_MAX / 8];
+descriptor_t ldt[SEL_LDT_MAX / 8];
+task_state_segment_t tss;
+
+#if !OS64
+descriptor_t idt[256];
+#else
+descriptor64_t idt[256];
+#endif
+
+#endif
+
 #if OS86
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
 void isr##__hex(void); \
@@ -645,6 +697,9 @@ static inline void enter_usermode(void)
 	pushw	%0\n\
 	pushw	%%ax\n\
 	pushfw\n\
+	popw	%%ax\n\
+	orw	$0x3000, %%ax # set IOPL to 3 to allow I/O\n\
+	pushw	%%ax\n\
 	pushw	%1\n\
 	pushw	$1f\n\
 	iretw\n\
@@ -658,6 +713,9 @@ static inline void enter_usermode(void)
 	pushl	%0\n\
 	pushl	%%eax\n\
 	pushfl\n\
+	popl	%%eax\n\
+	orw	$0x3000, %%ax # set IOPL to 3 to allow I/O\n\
+	pushl	%%eax\n\
 	pushl	%1\n\
 	pushl	$1f\n\
 	iretl\n\
@@ -673,6 +731,9 @@ static inline void enter_usermode(void)
 	pushq	%0\n\
 	pushq	%%rax\n\
 	pushfq\n\
+	popq	%%rax\n\
+	orw	$0x3000, %%ax # set IOPL to 3 to allow I/O\n\
+	pushq	%%rax\n\
 	pushq	%1\n\
 	pushq	$1f\n\
 	iretq\n\
@@ -693,11 +754,11 @@ static inline void setup_tables(void)
 	descriptor_set_segment(&gdt[SEL_KERNEL_SS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 # if defined IBMPC
 	if(*(char *)0x0449 != 0x07)
-		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B8000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
+		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B8000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 	else
-		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B0000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
+		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B0000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 # elif defined NECPC98
-	descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0A0000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
+	descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0A0000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 # endif
 	descriptor_set_segment(&gdt[SEL_KERNEL_SEGMENT1 / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 	descriptor_set_segment(&gdt[SEL_KERNEL_SEGMENT2 / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);

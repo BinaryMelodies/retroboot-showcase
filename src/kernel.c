@@ -49,62 +49,6 @@
 # define SYSNAME "Apple Macintosh"
 #endif
 
-#if __ia16__ || __i386__ || __amd64__
-# define __X86__ 1
-#endif
-
-#if OS286 || OS386 || OS64
-enum
-{
-	SEL_KERNEL_CS = 0x08,
-	SEL_KERNEL_SS = 0x10, // must follow CS for SYSENTER and SYSCALL
-#if OS286
-	SEL_KERNEL_SCREEN = 0x18,
-	SEL_KERNEL_SEGMENT1 = 0x20, // used as source segment for huge transfers
-	SEL_KERNEL_SEGMENT2 = 0x28, // used as destination segment for huge transfers
-	SEL_TSS = 0x30,
-	SEL_LDT = 0x38,
-	SEL_GDT_MAX = 0x40,
-
-	SEL_CALL7 = 0x04,
-	SEL_USER_CS = 0x0C,
-	SEL_USER_SS = 0x14,
-	SEL_LDT_MAX = 0x18,
-#elif OS386
-	SEL_USER_CS = 0x18, // must follow CS/SS for SYSEXIT
-	SEL_USER_SS = 0x20, // must follow CS/SS for SYSEXIT
-	SEL_TSS = 0x28,
-	SEL_LDT = 0x30,
-	SEL_GDT_MAX = 0x38,
-
-	SEL_CALL7 = 0x04,
-	SEL_LDT_MAX = 0x08,
-#elif OS64
-	SEL_USER_CS32 = 0x18, // must follow CS/SS for SYSEXIT
-	SEL_USER_SS32 = 0x20, // must follow CS/SS for SYSEXIT
-	SEL_USER_CS = 0x28, // must follow CS/SS for SYSEXIT and CS32/SS32 for SYSCALL
-	SEL_USER_SS = 0x30, // must follow CS/SS for SYSEXIT
-	SEL_TSS = 0x38, // takes up 2 slots
-	SEL_LDT = 0x48, // takes up 2 slots
-	SEL_GDT_MAX = 0x58,
-
-	SEL_CALL7 = 0x04,
-	SEL_LDT_MAX = 0x08,
-#endif
-};
-
-descriptor_t gdt[SEL_GDT_MAX / 8];
-descriptor_t ldt[SEL_LDT_MAX / 8];
-task_state_segment_t tss;
-
-#if !OS64
-descriptor_t idt[256];
-#else
-descriptor64_t idt[256];
-#endif
-
-#endif
-
 #if USE_VGA_EMULATION
 # ifndef SCREEN_WIDTH_MAX
 #  define SCREEN_WIDTH_MAX SCREEN_WIDTH
@@ -276,6 +220,8 @@ static inline void screen_putdec(ssize_t value)
 #include "x86.c"
 #endif
 
+#include "system.c"
+
 noreturn void kmain(void);
 
 extern char image_start;
@@ -326,7 +272,7 @@ static inline void test_interrupts(void)
 
 noreturn void kmain(void)
 {
-#if __X86__
+#if __ia16__ || __i386__ || __amd64__
 	disable_interrupts();
 
 	setup_tables();
@@ -349,6 +295,11 @@ noreturn void kmain(void)
 	enter_usermode();
 #endif
 #endif
+
+	if(is_system_mode())
+		screen_putstr("Running in system mode\n");
+	else
+		screen_putstr("Running in user mode\n");
 
 	test_interrupts();
 
