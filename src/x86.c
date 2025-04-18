@@ -1,5 +1,6 @@
 
 #include "i8259.c"
+#include "i8253.c"
 
 #if OS286 || OS386 || OS64
 enum
@@ -658,6 +659,8 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 #endif
 }
 
+static inline void timer_interrupt_handler(registers_t * registers);
+
 void interrupt_handler(registers_t * registers)
 {
 	if(IRQ8 <= registers->FLD_INTERRUPT_NUMBER && registers->FLD_INTERRUPT_NUMBER < IRQ8 + 8)
@@ -693,6 +696,15 @@ void interrupt_handler(registers_t * registers)
 	screen_putstr(":0x");
 	screen_puthex(registers->FLD_IP);
 	screen_putchar(' ');
+
+	switch(registers->FLD_INTERRUPT_NUMBER)
+	{
+#if defined IBMPC || defined NECPC98
+	case IRQ0 + 0: // timer interrupt
+		timer_interrupt_handler(registers);
+		break;
+#endif
+	}
 
 	screen_x = old_screen_x;
 	screen_y = old_screen_y;
@@ -756,6 +768,24 @@ static inline void enter_usermode(void)
 	movl	%%eax, %%fs\n\
 	movl	%%eax, %%gs\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
 #endif
+}
+
+static volatile uint32_t timer_tick;
+
+static inline void timer_interrupt_handler(registers_t * registers)
+{
+	(void) registers;
+
+	timer_tick ++;
+
+	screen_x = SCREEN_WIDTH - 1;
+	screen_y = 0;
+#if defined IBMPC
+	screen_attribute = 0x0F; // white on black
+#elif defined NECPC98
+	screen_attribute = 0xE1; // white on black
+#endif
+	screen_putchar("/-\\|"[timer_tick & 3]);
 }
 
 static inline void setup_tables(void)
@@ -1102,5 +1132,6 @@ static inline void setup_tables(void)
 #endif
 
 	i8259_setup(IRQ0, IRQ8);
+	i8253_setup(20);
 }
 
