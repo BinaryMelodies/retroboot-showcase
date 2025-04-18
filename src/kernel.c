@@ -280,20 +280,48 @@ noreturn void kmain(void);
 
 extern char image_start;
 
-void test_scroll(void)
+static inline void test_long_line(void)
+{
+	for(int i = 0; i <= SCREEN_WIDTH; i += 17)
+		screen_putstr(" a very long line"); // 17 is a prime number, very unlikely to divide SCREEN_WIDTH evenly
+	screen_putchar('\n');
+}
+
+static inline void test_puthex(void)
+{
+	// truncated to fit integer size
+	screen_puthex((size_t)0x1A2B3C4D);
+	screen_putchar('\n');
+
+	screen_putstr("Starting address for image: ");
+	screen_puthex((size_t)&image_start);
+	screen_putchar('\n');
+}
+
+static inline void test_putdec(void)
+{
+	screen_putdec(-12345);
+	screen_putchar('\n');
+}
+
+static inline void test_scroll(void)
 {
 	screen_putstr("This line will be erased\n");
-	screen_puthex((size_t)&image_start);
-	screen_putstr("\n");
-	screen_putstr("Greetings! " OSNAME " for " SYSNAME COMMENT);
-	screen_putstr("\n");
-	screen_puthex((size_t)0x1A2B3C4D);
-#if !ATARI // TODO: 68000 pcrel modsi3 does not work
-	screen_putdec(-12345);
-#endif
-	screen_putstr("\n");
-	for(int i = 4; i < SCREEN_HEIGHT; i++)
+	screen_putstr("This line will not be erased\n");
+	for(int i = 2; i < SCREEN_HEIGHT; i++)
 		screen_putstr("scroll\n");
+
+#if USE_VGA_EMULATION || IBMPC || NECPC98
+	screen_y = 2;
+#endif
+}
+
+static inline void test_interrupts(void)
+{
+#if __ia16__ || __i386__ || __amd64__
+	asm volatile("int $3");
+	asm volatile("int $4");
+#endif
 }
 
 noreturn void kmain(void)
@@ -306,18 +334,23 @@ noreturn void kmain(void)
 
 	screen_init();
 
-//	screen_putstr("Greetings! " OSNAME " for " SYSNAME COMMENT);
-
 	test_scroll();
+
+	screen_putstr("Greetings! " OSNAME " for " SYSNAME COMMENT "\n");
+
+	test_long_line();
+	test_puthex();
+#if !ATARI
+	test_putdec();
+#endif
 
 #if __ia16__ || __i386__ || __amd64__
 #if OS286 || OS386 || OS64
 	enter_usermode();
 #endif
-
-	asm volatile("int $3");
-	asm volatile("int $4");
 #endif
+
+	test_interrupts();
 
 	for(;;)
 		;
