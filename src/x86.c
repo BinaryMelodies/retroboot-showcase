@@ -1,4 +1,6 @@
 
+#include "i8259.c"
+
 #if OS286 || OS386 || OS64
 enum
 {
@@ -50,6 +52,12 @@ descriptor64_t idt[256];
 #endif
 
 #endif
+
+enum
+{
+	IRQ0 = 32,
+	IRQ8 = IRQ0 + 8,
+};
 
 #if OS86
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
@@ -512,6 +520,7 @@ asm(
 );
 #endif
 
+
 #if OS86
 typedef struct call_frame_t
 {
@@ -541,6 +550,9 @@ typedef struct registers_t
 		call_frame_t far * frame;
 	};
 } registers_t;
+# define FLD_INTERRUPT_NUMBER frame->interrupt_number
+# define FLD_CS frame->cs
+# define FLD_IP frame->ip
 #elif OS286
 typedef struct registers_t
 {
@@ -562,6 +574,9 @@ typedef struct registers_t
 	uint16_t ss;
 	uint16_t sp;
 } registers_t;
+# define FLD_INTERRUPT_NUMBER interrupt_number
+# define FLD_CS cs
+# define FLD_IP ip
 #elif OS386
 typedef struct registers_t
 {
@@ -585,6 +600,9 @@ typedef struct registers_t
 	uint32_t esp;
 	uint32_t ss;
 } registers_t;
+# define FLD_INTERRUPT_NUMBER interrupt_number
+# define FLD_CS cs
+# define FLD_IP eip
 #elif OS64
 typedef struct registers_t
 {
@@ -615,6 +633,9 @@ typedef struct registers_t
 	uint64_t rsp;
 	uint64_t ss;
 } registers_t;
+# define FLD_INTERRUPT_NUMBER interrupt_number
+# define FLD_CS cs
+# define FLD_IP rip
 #endif
 
 #if OS86
@@ -639,6 +660,16 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 
 void interrupt_handler(registers_t * registers)
 {
+	if(IRQ8 <= registers->FLD_INTERRUPT_NUMBER && registers->FLD_INTERRUPT_NUMBER < IRQ8 + 8)
+	{
+		outp(PORT_PIC2_COMMAND, PIC_EOI);
+		outp(PORT_PIC1_COMMAND, PIC_EOI);
+	}
+	else if(IRQ0 <= registers->FLD_INTERRUPT_NUMBER && registers->FLD_INTERRUPT_NUMBER < IRQ0 + 8)
+	{
+		outp(PORT_PIC1_COMMAND, PIC_EOI);
+	}
+
 	uint8_t old_screen_x = screen_x;
 	uint8_t old_screen_y = screen_y;
 	uint8_t old_screen_attribute = screen_attribute;
@@ -652,33 +683,16 @@ void interrupt_handler(registers_t * registers)
 #endif
 
 	screen_putstr("Interrupt 0x");
-#if !OS86
-	screen_puthex(registers->interrupt_number);
-#else
-	screen_puthex(registers->frame->interrupt_number);
-#endif
+	screen_puthex(registers->FLD_INTERRUPT_NUMBER);
 #if !OS86
 	screen_putstr(" with error code ");
 	screen_puthex(registers->error_code);
 #endif
 	screen_putstr(" called from 0x");
-#if OS64
-	screen_puthex(registers->cs);
+	screen_puthex(registers->FLD_CS);
 	screen_putstr(":0x");
-	screen_puthex(registers->rip);
-#elif OS386
-	screen_puthex(registers->cs);
-	screen_putstr(":0x");
-	screen_puthex(registers->eip);
-#elif OS286
-	screen_puthex(registers->cs);
-	screen_putstr(":0x");
-	screen_puthex(registers->ip);
-#else
-	screen_puthex(registers->frame->cs);
-	screen_putstr(":0x");
-	screen_puthex(registers->frame->ip);
-#endif
+	screen_puthex(registers->FLD_IP);
+	screen_putchar(' ');
 
 	screen_x = old_screen_x;
 	screen_y = old_screen_y;
@@ -1086,5 +1100,7 @@ static inline void setup_tables(void)
 
 	load_tss(SEL_TSS);
 #endif
+
+	i8259_setup(IRQ0, IRQ8);
 }
 

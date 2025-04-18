@@ -267,6 +267,7 @@ static inline void test_interrupts(void)
 #if __ia16__ || __i386__ || __amd64__
 	asm volatile("int $3");
 	asm volatile("int $4");
+	asm volatile("int $0x80");
 #endif
 }
 
@@ -300,6 +301,10 @@ noreturn void kmain(void)
 		screen_putstr("Running in user mode\n");
 
 	test_interrupts();
+
+#if __ia16__ || __i386__ || __amd64__
+	enable_interrupts();
+#endif
 
 	for(;;)
 		;
