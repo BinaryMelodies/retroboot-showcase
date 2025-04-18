@@ -23,16 +23,6 @@ typedef uint16_t limit_t;
 typedef uint32_t limit_t;
 #endif
 
-static inline void enable_interrupts(void)
-{
-	asm volatile("sti");
-}
-
-static inline void disable_interrupts(void)
-{
-	asm volatile("cli");
-}
-
 static inline void io_wait(void)
 {
 	outb(0x80, 0); // unused port

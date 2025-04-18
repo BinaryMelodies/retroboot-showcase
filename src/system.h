@@ -1,3 +1,5 @@
+#ifndef _SYSTEM_H
+#define _SYSTEM_H
 
 static inline bool is_system_mode(void)
 {
@@ -26,9 +28,28 @@ static inline void enter_usermode(void)
 {
 #if __m68k__
 	asm volatile("\
-	move.l	%usp, %sp\n\
+	move.l	%sp, %usp\n\
 	andi.w	#0xDFFF, %sr");
 #endif
 }
 #endif
 
+static inline void enable_interrupts(void)
+{
+#if __ia16__ || __i386__ || __amd64__
+	asm volatile("sti");
+#elif __m68k__
+	asm volatile("andi.w\t#0xF8FF, %sr"); // TODO: this enables all interrupts
+#endif
+}
+
+static inline void disable_interrupts(void)
+{
+#if __ia16__ || __i386__ || __amd64__
+	asm volatile("cli");
+#elif __m68k__
+	asm volatile("ori.w\t#0x0700, %sr");
+#endif
+}
+
+#endif // _SYSTEM_H

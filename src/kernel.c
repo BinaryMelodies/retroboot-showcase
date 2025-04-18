@@ -8,6 +8,7 @@
 #include "stdint.h"
 #include "stdnoreturn.h"
 #include "string.h"
+#include "system.h"
 
 #ifndef __ia16__
 # define far
@@ -220,8 +221,6 @@ static inline void screen_putdec(ssize_t value)
 #include "x86.c"
 #endif
 
-#include "system.c"
-
 noreturn void kmain(void);
 
 extern char image_start;
@@ -273,9 +272,9 @@ static inline void test_interrupts(void)
 
 noreturn void kmain(void)
 {
-#if __ia16__ || __i386__ || __amd64__
 	disable_interrupts();
 
+#if __ia16__ || __i386__ || __amd64__
 	setup_tables();
 #endif
 
@@ -291,9 +290,10 @@ noreturn void kmain(void)
 	test_putdec();
 #endif
 
-#if !__m68k__ // TODO: this does not work yet
-	enter_usermode();
+#if MACINTOSH
+	if(screen_depth == 1) // TODO: switching to user mode does not work yet on Macintosh II, this check does not work on a MacII with a monochrome display
 #endif
+	enter_usermode();
 
 	if(is_system_mode())
 		screen_putstr("Running in system mode\n");
