@@ -66,6 +66,7 @@ Links to some online resources:
 
 * [OSDev.org](https://wiki.osdev.org/Expanded_Main_Page)
 * [sandpile.org](https://sandpile.org/)
+* [Roll your own toy UNIX-clone OS by James Molloy](http://web.archive.org/web/20160414051121/http://www.jamesmolloy.co.uk/tutorial_html/)
 * [Learn Assembly Programming with ChibiAkumas](https://www.chibiakumas.com/68000/)
 * NEC PC-98 references
     * [NEC PC98 Basic Reference](https://radioc.web.fc2.com/column/pc98bas/index_en.htm)
