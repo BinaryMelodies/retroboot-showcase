@@ -5,10 +5,10 @@ DISKFILE=disk.img
 AS=i686-elf-as
 CC=i686-elf-gcc
 
-ASFLAGS=--defsym OS386=1 --defsym MODE_PROTECTED=1 --defsym CPU_80386=1 --defsym BITS32=1 --defsym MACHINE_IBMPC=1
+ASFLAGS=--defsym MODE_PROTECTED=1 --defsym CPU_80386=1 --defsym BITS32=1 --defsym MACHINE_IBMPC=1
 CFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -march=i386
 CFLAGS+= -O2
-CFLAGS+= -Isrc/pc86 -DOS386=1 -DMODE_PROTECTED=1 -DCPU_80386=1 -DMACHINE_IBMPC=1
+CFLAGS+= -Isrc/pc86 -DMODE_PROTECTED=1 -DCPU_80386=1 -DMACHINE_IBMPC=1
 LDFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
 DISKSIZE=1440

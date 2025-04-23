@@ -1,10 +1,4 @@
 
-.ifdef	OS86
-	.equ	OS86, 1
-.else
-	.equ	OS86, 0
-.endif
-
 .ifdef	MODE_REAL
 	.equ	MODE_REAL, 1
 .else
@@ -51,24 +45,6 @@
 	.equ	BITS64, 1
 .else
 	.equ	BITS64, 0
-.endif
-
-.ifdef	OS286
-	.equ	OS286, 1
-.else
-	.equ	OS286, 0
-.endif
-
-.ifdef	OS386
-	.equ	OS386, 1
-.else
-	.equ	OS386, 0
-.endif
-
-.ifdef	OS64
-	.equ	OS64, 1
-.else
-	.equ	OS64, 0
 .endif
 
 .ifdef	MACHINE_IBMPC

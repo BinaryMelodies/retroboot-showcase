@@ -5,10 +5,10 @@ DISKFILE=disk.img
 AS=x86_64-elf-as
 CC=x86_64-elf-gcc
 
-ASFLAGS=--defsym OS64=1 --defsym MODE_LONG=1 --defsym BITS64=1 --defsym MACHINE_IBMPC=1
+ASFLAGS=--defsym MODE_LONG=1 --defsym BITS64=1 --defsym MACHINE_IBMPC=1
 CFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -march=x86-64 -mcmodel=large -mno-red-zone -mno-mmx -mno-sse -mno-sse2
 CFLAGS+= -O2
-CFLAGS+= -Isrc/pc86 -DOS64=1 -DMODE_LONG=1 -DMACHINE_IBMPC=1
+CFLAGS+= -Isrc/pc86 -DMODE_LONG=1 -DMACHINE_IBMPC=1
 LDFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
 DISKSIZE=1440
