@@ -219,6 +219,8 @@ static inline void screen_putdec(ssize_t value)
 
 #if __ia16__ || __i386__ || __amd64__
 #include "x86.c"
+#elif __m68k__
+#include "m68k.c"
 #endif
 
 noreturn void kmain(void);
@@ -252,7 +254,11 @@ static inline void test_putdec(void)
 static inline void test_scroll(void)
 {
 	screen_putstr("This line will be erased\n");
-	screen_putstr("This line will not be erased\n");
+
+	screen_putstr("Starting address for image: ");
+	screen_puthex((size_t)&image_start);
+	screen_putchar('\n');
+
 	for(int i = 2; i < SCREEN_HEIGHT; i++)
 		screen_putstr("scroll\n");
 
@@ -272,9 +278,9 @@ static inline void test_interrupts(void)
 
 noreturn void kmain(void)
 {
-	disable_interrupts();
+	uint16_t intval = disable_interrupts();
 
-#if __ia16__ || __i386__ || __amd64__
+#if !AMIGA && !X68000 && !MACINTOSH // TODO
 	setup_tables();
 #endif
 
@@ -290,6 +296,10 @@ noreturn void kmain(void)
 	test_putdec();
 #endif
 
+#if !AMIGA && !X68000 && !MACINTOSH // TODO
+	enable_interrupts(intval);
+#endif
+
 #if MACINTOSH
 	if(screen_depth == 1) // TODO: switching to user mode does not work yet on Macintosh II, this check does not work on a MacII with a monochrome display
 #endif
@@ -302,13 +312,9 @@ noreturn void kmain(void)
 
 	test_interrupts();
 
-#if __ia16__ || __i386__ || __amd64__
-	enable_interrupts();
-#endif
-
 	for(;;)
 	{
-#if __ia16__ || __i386__ || __amd64__
+#if !AMIGA && !X68000 && !MACINTOSH // TODO
 		screen_putchar(keyboard_getch());
 		if(screen_y == SCREEN_HEIGHT - 1)
 		{

@@ -11,7 +11,7 @@ static const struct
 	char shifted;
 } keyboard_scancode_table[256] =
 {
-#if defined IBMPC
+#if defined IBMPC || defined ATARI
 	[0x01] = { '\33', '\33' },
 	[0x02] = { '1', '!' },
 	[0x03] = { '2', '@' },
@@ -132,13 +132,22 @@ static volatile bool keyboard_shift = false;
 static volatile char keyboard_buffer[KEYBOARD_BUFFER_SIZE];
 static volatile size_t keyboard_buffer_count;
 static volatile size_t keyboard_buffer_pointer;
+static volatile bool keyboard_used = false;
 
 static inline void keyboard_buffer_push(char c)
 {
+	while(keyboard_used)
+		;
+	keyboard_used = true;
 	if(keyboard_buffer_count < KEYBOARD_BUFFER_SIZE)
 	{
+#if !ATARI
 		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) % KEYBOARD_BUFFER_SIZE] = c;
+#else
+		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) & (KEYBOARD_BUFFER_SIZE - 1)] = c;
+#endif
 	}
+	keyboard_used = false;
 }
 
 static inline bool keyboard_buffer_empty(void)
@@ -154,9 +163,17 @@ static inline int keyboard_buffer_remove(void)
 	}
 	else
 	{
+		while(keyboard_used)
+			;
+		keyboard_used = true;
 		int c = keyboard_buffer[keyboard_buffer_pointer];
+#if !ATARI
 		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) % KEYBOARD_BUFFER_SIZE;
+#else
+		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) & (KEYBOARD_BUFFER_SIZE - 1);
+#endif
 		keyboard_buffer_count --;
+		keyboard_used = false;
 		return c;
 	}
 }
@@ -171,10 +188,23 @@ static inline int keyboard_buffer_remove(void)
 # define PS2_SCANCODE_RELEASED 0x80
 #endif
 
-static inline uint8_t keyboard_interrupt_process(void)
+#if defined ATARI
+typedef struct acia_t
 {
-	uint8_t scancode = inp(PORT_PS2_DATA);
+	uint8_t control, _0, data, _1;
+} acia_t;
+#define acia (*(volatile acia_t *)0xFFFFFC00)
+#define ACIA_IRQ 0x80
+#define MFP_BASE ((volatile uint8_t *)0xFFFFFA00)
 
+# define PS2_SCANCODE_RELEASED 0x80
+# define PS2_SCANCODE_LSHIFT 0x2A
+# define PS2_SCANCODE_RSHIFT 0x36
+#endif
+
+static inline void keyboard_interrupt_process(uint8_t scancode)
+{
+#if !AMIGA && !MACINTOSH && !X68000 // TODO
 	if((scancode & PS2_SCANCODE_RELEASED) == 0)
 	{
 		// key pressed
@@ -198,8 +228,7 @@ static inline uint8_t keyboard_interrupt_process(void)
 			keyboard_shift = false;
 		}
 	}
-
-	return scancode;
+#endif
 }
 
 static inline bool keyboard_kbhit(void)
@@ -212,22 +241,5 @@ static inline int keyboard_getch(void)
 	while(keyboard_buffer_empty())
 		;
 	return keyboard_buffer_remove();
-}
-
-static inline void test_scrolling(void)
-{
-	for(int i = 0; i < SCREEN_HEIGHT; i++)
-	{
-		screen_putstr("scroll test\n");
-	}
-
-	screen_puthex((size_t)0x1A2B3C4D);
-	screen_putdec(-12345);
-#if !OS86
-	screen_putdec(sizeof(descriptor_t));
-#if OS64
-	screen_putdec(sizeof(descriptor64_t));
-#endif
-#endif
 }
 

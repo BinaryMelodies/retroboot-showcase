@@ -799,7 +799,10 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 {
 	(void) registers;
 
-	uint8_t scancode = keyboard_interrupt_process();
+	uint8_t scancode;
+#if defined IBMPC || defined NECPC98
+	scancode = inp(PORT_PS2_DATA);
+#endif
 
 	screen_x = SCREEN_WIDTH - 2;
 	screen_y = 1;
@@ -809,6 +812,8 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 	screen_attribute = 0x25; // black on blue
 #endif
 	screen_puthex(scancode);
+
+	keyboard_interrupt_process(scancode);
 }
 
 static inline void setup_tables(void)

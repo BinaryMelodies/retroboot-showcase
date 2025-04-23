@@ -24,31 +24,46 @@ static inline bool is_system_mode(void)
 }
 
 #if !__ia16__ && !__i386__ && !__amd64__ // defined in x86.c
+static char system_stack[512] __attribute__((aligned(8)));
 static inline void enter_usermode(void)
 {
 #if __m68k__
-	asm volatile("\
-	move.l	%sp, %usp\n\
-	andi.w	#0xDFFF, %sr");
+	asm volatile(
+		"move.l\t%%sp, %%usp\n\t"
+		"move.l\t%0, %%sp\n\t"
+		"andi.w\t#0xDFFF, %%sr"
+		: : "r"((size_t)system_stack + sizeof system_stack));
 #endif
 }
 #endif
 
-static inline void enable_interrupts(void)
+static inline void enable_interrupts(uint16_t sr)
 {
 #if __ia16__ || __i386__ || __amd64__
+	(void) sr;
 	asm volatile("sti");
 #elif __m68k__
-	asm volatile("andi.w\t#0xF8FF, %sr"); // TODO: this enables all interrupts
+	asm volatile(
+		"move.w\t%%sr, %%d0\n\t"
+		"andi.w\t#0xF8FF, %%d0\n\t"
+		"andi.w\t#0x0700, %0\n\t"
+		"or.w\t%0, %%d0\n\t"
+		"move.w\t%%d0, %%sr" : : "d"(sr) : "%d0");
 #endif
 }
 
-static inline void disable_interrupts(void)
+static inline uint16_t disable_interrupts(void)
 {
 #if __ia16__ || __i386__ || __amd64__
 	asm volatile("cli");
+	return 0;
 #elif __m68k__
-	asm volatile("ori.w\t#0x0700, %sr");
+	uint16_t sr;
+	asm volatile(
+		"move.w\t%%sr, %0\n\t"
+		"ori.w\t#0x0700, %%sr"
+		: "=r"(sr));
+	return sr;
 #endif
 }
 
