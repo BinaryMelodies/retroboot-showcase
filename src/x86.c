@@ -29,7 +29,7 @@ enum
 
 	SEL_CALL7 = 0x04,
 	SEL_LDT_MAX = 0x08,
-#elif OS64
+#elif __amd64__
 	SEL_USER_CS32 = 0x18, // must follow CS/SS for SYSEXIT
 	SEL_USER_SS32 = 0x20, // must follow CS/SS for SYSEXIT
 	SEL_USER_CS = 0x28, // must follow CS/SS for SYSEXIT and CS32/SS32 for SYSCALL
@@ -47,7 +47,7 @@ descriptor_t gdt[SEL_GDT_MAX / 8];
 descriptor_t ldt[SEL_LDT_MAX / 8];
 task_state_segment_t tss;
 
-#if !OS64
+#if !__amd64__
 descriptor_t idt[256];
 #else
 descriptor64_t idt[256];
@@ -110,7 +110,7 @@ asm( \
 	"pushl\t$" #__hex "\n\t" \
 	"jmp\tisr_common" \
 );
-#elif OS64
+#elif __amd64__
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
 void isr##__hex(void); \
 asm( \
@@ -467,7 +467,7 @@ asm(
 	"addl\t$8, %esp\n\t"
 	"iretl"
 );
-#elif OS64
+#elif __amd64__
 asm(
 	".global\tisr_common\n\t"
 	"isr_common:\n\t"
@@ -605,7 +605,7 @@ typedef struct registers_t
 # define FLD_INTERRUPT_NUMBER interrupt_number
 # define FLD_CS cs
 # define FLD_IP eip
-#elif OS64
+#elif __amd64__
 typedef struct registers_t
 {
 	uint64_t gs;
@@ -653,7 +653,7 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 #if MODE_REAL
 	*(uint16_t *)MK_FP(0, interrupt_number * 4)     = (size_t)offset;
 	*(uint16_t *)MK_FP(0, interrupt_number * 4 + 2) = selector;
-#elif !OS64
+#elif !__amd64__
 	descriptor_set_gate(&idt[interrupt_number], selector, (size_t)offset, access);
 #else
 	descriptor_set_gate(&idt[interrupt_number], selector, (size_t)offset, access);
@@ -756,7 +756,7 @@ static inline void enter_usermode(void)
 	movl	%%eax, %%es\n\
 	movl	%%eax, %%fs\n\
 	movl	%%eax, %%gs\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
-#elif OS64
+#elif __amd64__
 	asm volatile("\
 	movq	%%rsp, %%rax\n\
 	pushq	%0\n\
@@ -846,7 +846,7 @@ static inline void setup_tables(void)
 	descriptor_set_segment(&gdt[SEL_LDT / 8], (size_t)ldt, sizeof ldt - 1, DESCRIPTOR_ACCESS_LDT | DESCRIPTOR_ACCESS_CPL0, 0);
 
 	descriptor_set_gate(&ldt[SEL_CALL7 / 8], SEL_KERNEL_CS, 0/* TODO */, DESCRIPTOR_ACCESS_CALLGATE32 | DESCRIPTOR_ACCESS_CPL3);
-#elif OS64
+#elif __amd64__
 	descriptor_set_segment(&gdt[SEL_KERNEL_CS / 8], 0, 0, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_64BIT);
 	descriptor_set_segment(&gdt[SEL_KERNEL_SS / 8], 0, 0, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, 0);
 	descriptor_set_segment(&gdt[SEL_USER_CS32 / 8], 0, 0, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_32BIT);
@@ -873,7 +873,7 @@ static inline void setup_tables(void)
 #elif MODE_PROTECTED && __i386__
 # define DESCRIPTOR_ACCESS_INTGATE DESCRIPTOR_ACCESS_INTGATE32 | DESCRIPTOR_ACCESS_CPL3
 # define KERNEL_SEGMENT SEL_KERNEL_CS
-#elif OS64
+#elif __amd64__
 # define DESCRIPTOR_ACCESS_INTGATE DESCRIPTOR_ACCESS_INTGATE64 | DESCRIPTOR_ACCESS_CPL3
 # define KERNEL_SEGMENT SEL_KERNEL_CS
 #endif

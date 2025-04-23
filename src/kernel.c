@@ -24,6 +24,10 @@
 # endif
 #elif __i386__
 # define OSNAME "OS/386"
+#elif __amd64__
+# define OSNAME "OS/64"
+#elif __m68k__
+# define OSNAME "OS/68000"
 #endif
 
 #if MODE_REAL
@@ -38,13 +42,8 @@
 # else
 #  define COMMENT " running in 32-bit protected mode"
 # endif
-#endif
-
-#if defined OS64
-# define OSNAME "OS/64"
+#elif MODE_LONG
 # define COMMENT " running in 64-bit long mode"
-#elif defined OS68000
-# define OSNAME "OS/68000"
 #endif
 
 #ifndef COMMENT

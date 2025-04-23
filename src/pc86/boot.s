@@ -35,6 +35,24 @@
 	.equ	CPU_80386, 0
 .endif
 
+.ifdef	BITS16
+	.equ	BITS16, 1
+.else
+	.equ	BITS16, 0
+.endif
+
+.ifdef	BITS32
+	.equ	BITS32, 1
+.else
+	.equ	BITS32, 0
+.endif
+
+.ifdef	BITS64
+	.equ	BITS64, 1
+.else
+	.equ	BITS64, 0
+.endif
+
 .ifdef	OS286
 	.equ	OS286, 1
 .else
@@ -143,7 +161,7 @@ _start:
 	movw	%ax, %ds
 	movw	%ax, %es
 
-.if !MODE_REAL
+.if MODE_PROTECTED
 	# Check for at least 286 support, otherwise no protected mode is available
 	pushfw
 	popw	%ax
@@ -157,7 +175,7 @@ _start:
 	cmp	$0xF000, %ax
 	je	error_old_cpu
 
-.if !CPU_80386
+.if BITS32 || CPU_80386
 	# Check for at least 386 support, otherwise no 32-bit mode or registers are available
 	or	$0xF000, %cx
 	pushw	%cx
@@ -171,7 +189,7 @@ _start:
 	pushw	%ax
 	popf
 
-.if OS64
+.if BITS64
 	# Check for CPUID support
 	pushfl
 	popl	%eax
@@ -282,7 +300,7 @@ read_sectors:
 	# Load CS with a protected mode descriptor
 	jmp	$0x08, $pm_start
 .endif
-.if OS64
+.if BITS64
 	# Entering long mode directly from real mode, based on https://wiki.osdev.org/Entering_Long_Mode_Directly
 	# Set up identity paging tables from 0x1000
 	movw	$0x1000, %di
@@ -346,7 +364,7 @@ read_sectors:
 	movb	$0, %al
 	rep	stosb
 .endif
-.if MODE_PROTECTED && CPU_80286
+.if MODE_PROTECTED && BITS16
 pm_start:
  	# Now we are in protected mode
 	# Set up stack and other segment registers with protected mode selectors
@@ -362,7 +380,7 @@ pm_start:
 	movb	$0, %al
 	rep	stosb
 .endif
-.if MODE_PROTECTED && CPU_80386
+.if MODE_PROTECTED && BITS32
 	.code32
 pm_start:
 	# Now we are in 32-bit protected mode
@@ -381,7 +399,7 @@ pm_start:
 	movb	$0, %al
 	rep	stosb
 .endif
-.if OS64
+.if BITS64
 	.code64
 pm_start:
 	# Now we are in 64-bit protected mode
@@ -463,7 +481,7 @@ message_old_cpu:
 message_old_cpu:
 	.ascii	"Intel 80386 or newer expected"
 .endif
-.if OS64
+.if BITS64
 message_old_cpu:
 	.ascii	"AMD64 or Intel64 expected"
 .endif
@@ -471,7 +489,7 @@ message_old_cpu:
 	.equ	length_message_old_cpu, . - message_old_cpu
 .endif
 
-.if MODE_PROTECTED && CPU_80286
+.if MODE_PROTECTED && BITS16
 	.align	4, 0
 gdtr:
 	.word	gdt_end - gdt - 1
@@ -491,7 +509,7 @@ gdt:
 .endif
 gdt_end:
 .endif
-.if MODE_PROTECTED && CPU_80386
+.if MODE_PROTECTED && BITS32
 	.align	4, 0
 gdtr:
 	.word	gdt_end - gdt - 1
@@ -504,7 +522,7 @@ gdt:
 	descriptor	0, 0xFFFFFFFF, DESC_DATA | DESC_32BIT
 gdt_end:
 .endif
-.if OS64
+.if BITS64
 	.align	4, 0
 gdtr:
 	.word	gdt_end - gdt - 1

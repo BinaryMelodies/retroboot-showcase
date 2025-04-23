@@ -68,7 +68,7 @@ typedef struct descriptor_table_t
 	address_t base; // 32-bit for 286/386, 64-bit for x64
 } __attribute__((packed)) descriptor_table_t;
 
-#if OS64
+#if __amd64__
 typedef struct segment_descriptor64_t
 {
 	uint16_t limit0;
@@ -163,7 +163,7 @@ typedef struct task_state_segment32_t
 	uint16_t iopb_offset;
 } task_state_segment32_t;
 
-#if OS64
+#if __amd64__
 typedef struct task_state_segment64_t
 {
 	uint32_t _reserved0;
@@ -188,7 +188,7 @@ typedef struct task_state_segment64_t
 typedef task_state_segment16_t task_state_segment_t;
 #elif __i386__ || CPU_80386
 typedef task_state_segment32_t task_state_segment_t;
-#elif OS64
+#elif __amd64__
 typedef task_state_segment64_t task_state_segment_t;
 #endif
 
@@ -254,7 +254,7 @@ static inline void descriptor_set_segment(descriptor_t * descriptor, uint32_t ba
 #endif
 }
 
-#if OS64
+#if __amd64__
 static inline void descriptor_set_segment64(descriptor64_t * descriptor, uint64_t base, limit_t limit, uint8_t access, uint8_t flags)
 {
 	if(limit > 0xFFF)
@@ -289,7 +289,7 @@ static inline void descriptor_set_gate32(descriptor_t * descriptor, uint16_t sel
 #endif
 }
 
-#if OS64
+#if __amd64__
 static inline void descriptor_set_gate64(descriptor64_t * descriptor, uint16_t selector, size_t offset, uint8_t access)
 {
 	descriptor->gate.offset0 = offset;
@@ -300,7 +300,7 @@ static inline void descriptor_set_gate64(descriptor64_t * descriptor, uint16_t s
 }
 #endif
 
-#if !OS64
+#if !__amd64__
 # define descriptor_set_gate descriptor_set_gate32
 #else
 # define descriptor_set_gate descriptor_set_gate64
@@ -361,7 +361,7 @@ static inline void load_gdt(descriptor_t * table, uint16_t size, uint16_t cs, ui
 #endif
 }
 
-#if !OS64
+#if !__amd64__
 static inline void load_idt(descriptor_t * table, uint16_t size)
 #else
 static inline void load_idt(descriptor64_t * table, uint16_t size)
