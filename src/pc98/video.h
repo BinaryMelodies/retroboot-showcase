@@ -50,7 +50,7 @@ static inline void screen_video_move_cursor(void)
 
 static inline void screen_init(void)
 {
-#if defined OS86
+#if MODE_REAL
 	screen_buffer = (unsigned short far *)0xA0000000;
 #elif defined OS286
 	screen_buffer = (unsigned short far *)0x00180000;

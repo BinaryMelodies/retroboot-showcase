@@ -61,7 +61,7 @@ enum
 	IRQ8 = IRQ0 + 8,
 };
 
-#if OS86
+#if MODE_REAL
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
 void isr##__hex(void); \
 asm( \
@@ -387,7 +387,7 @@ DEFINE_ISR_NO_ERROR_CODE(0xFD)
 DEFINE_ISR_NO_ERROR_CODE(0xFE)
 DEFINE_ISR_NO_ERROR_CODE(0xFF)
 
-#if OS86
+#if MODE_REAL
 asm(
 	".global\tisr_common\n\t"
 	"isr_common:\n\t"
@@ -523,7 +523,7 @@ asm(
 #endif
 
 
-#if OS86
+#if MODE_REAL
 typedef struct call_frame_t
 {
 	uint16_t interrupt_number;
@@ -640,7 +640,7 @@ typedef struct registers_t
 # define FLD_IP rip
 #endif
 
-#if OS86
+#if MODE_REAL
 // real mode provides no access flags, drop the argument
 # define set_interrupt(__interrupt_number, __selector, __offset, __access) set_interrupt(__interrupt_number, __selector, __offset)
 #endif
@@ -650,7 +650,7 @@ static char system_stack[512] __attribute__((aligned(8)));
 
 static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, void * offset, uint8_t access)
 {
-#if OS86
+#if MODE_REAL
 	*(uint16_t *)MK_FP(0, interrupt_number * 4)     = (size_t)offset;
 	*(uint16_t *)MK_FP(0, interrupt_number * 4 + 2) = selector;
 #elif !OS64
@@ -689,7 +689,7 @@ void interrupt_handler(registers_t * registers)
 
 	screen_putstr("Interrupt 0x");
 	screen_puthex(registers->FLD_INTERRUPT_NUMBER);
-#if !OS86
+#if !MODE_REAL
 	screen_putstr(" with error code ");
 	screen_puthex(registers->error_code);
 #endif
@@ -864,7 +864,7 @@ static inline void setup_tables(void)
 	load_ldt(SEL_LDT);
 #endif
 
-#if OS86
+#if MODE_REAL
 # define DESCRIPTOR_ACCESS_INTGATE 0
 # define KERNEL_SEGMENT 0
 #elif OS286
@@ -1134,11 +1134,11 @@ static inline void setup_tables(void)
 	set_interrupt(0xFD, KERNEL_SEGMENT, isr0xFD, DESCRIPTOR_ACCESS_INTGATE);
 	set_interrupt(0xFE, KERNEL_SEGMENT, isr0xFE, DESCRIPTOR_ACCESS_INTGATE);
 	set_interrupt(0xFF, KERNEL_SEGMENT, isr0xFF, DESCRIPTOR_ACCESS_INTGATE);
-#if !OS86
+#if !MODE_REAL
 	load_idt(idt, sizeof idt);
 #endif
 
-#if OS86
+#if MODE_REAL
 	(void) system_stack; // suppress warning
 
 #else

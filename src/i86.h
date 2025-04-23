@@ -17,7 +17,7 @@ typedef uint32_t address_t;
 typedef uint64_t address_t;
 #endif
 
-#if OS86 || OS286
+#if CPU_8086 || OS286
 typedef uint16_t limit_t;
 #else
 typedef uint32_t limit_t;
@@ -28,7 +28,7 @@ static inline void io_wait(void)
 	outb(0x80, 0); // unused port
 }
 
-#if !OS86
+#if !MODE_REAL
 typedef struct segment_descriptor_t
 {
 	uint16_t limit0;

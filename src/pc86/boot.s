@@ -5,6 +5,18 @@
 	.equ	OS86, 0
 .endif
 
+.ifdef	MODE_REAL
+	.equ	MODE_REAL, 1
+.else
+	.equ	MODE_REAL, 0
+.endif
+
+.ifdef	CPU_8086
+	.equ	CPU_8086, 1
+.else
+	.equ	CPU_8086, 0
+.endif
+
 .ifdef	OS286
 	.equ	OS286, 1
 .else
@@ -113,7 +125,7 @@ _start:
 	movw	%ax, %ds
 	movw	%ax, %es
 
-.if !OS86
+.if !MODE_REAL
 	# Check for at least 286 support, otherwise no protected mode is available
 	pushfw
 	popw	%ax
@@ -209,7 +221,7 @@ read_sectors:
 	int	$0x1B
 .endif
 
-.if !OS86
+.if !MODE_REAL
 	# Enable the A20 line
 .if MACHINE_IBMPC
 	inb	$0x92, %al
@@ -306,7 +318,7 @@ read_sectors:
 	ljmp	$0x08, $pm_start
 .endif
 
-.if OS86
+.if MODE_REAL
 	# Set up stack
 	movw	$stack_top, %sp
 
@@ -376,7 +388,7 @@ pm_start:
 	hlt
 	jmp	0b
 
-.if !OS86
+.if !MODE_REAL
 	.code16
 error_old_cpu:
 .if MACHINE_IBMPC
@@ -437,7 +449,7 @@ message_old_cpu:
 message_old_cpu:
 	.ascii	"AMD64 or Intel64 expected"
 .endif
-.if !OS86
+.if !MODE_REAL
 	.equ	length_message_old_cpu, . - message_old_cpu
 .endif
 

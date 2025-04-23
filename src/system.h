@@ -4,7 +4,7 @@
 static inline bool is_system_mode(void)
 {
 #if __ia16__ || __i386__ || __amd64__
-# if OS86
+# if MODE_REAL
 	// real mode is always in system mode
 	return true;
 # else
