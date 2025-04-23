@@ -8,7 +8,7 @@ enum
 {
 	SEL_KERNEL_CS = 0x08,
 	SEL_KERNEL_SS = 0x10, // must follow CS for SYSENTER and SYSCALL
-#if __ia16__ && !CPU_80386
+#if __ia16__
 	SEL_KERNEL_SCREEN = 0x18,
 	SEL_KERNEL_SEGMENT1 = 0x20, // used as source segment for huge transfers
 	SEL_KERNEL_SEGMENT2 = 0x28, // used as destination segment for huge transfers
@@ -20,7 +20,7 @@ enum
 	SEL_USER_CS = 0x0C,
 	SEL_USER_SS = 0x14,
 	SEL_LDT_MAX = 0x18,
-#elif OS386
+#elif __i386__
 	SEL_USER_CS = 0x18, // must follow CS/SS for SYSEXIT
 	SEL_USER_SS = 0x20, // must follow CS/SS for SYSEXIT
 	SEL_TSS = 0x28,
@@ -92,7 +92,7 @@ asm( \
 	"pushw\t$" #__hex "\n\t" \
 	"jmp\tisr_common" \
 );
-#elif OS386
+#elif MODE_PROTECTED && __i386__
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
 void isr##__hex(void); \
 asm( \
@@ -444,7 +444,7 @@ asm(
 	"addw\t$4, %sp\n\t"
 	"iretw"
 );
-#elif OS386
+#elif MODE_PROTECTED && __i386__
 asm(
 	".global\tisr_common\n\t"
 	"isr_common:\n\t"
@@ -579,7 +579,7 @@ typedef struct registers_t
 # define FLD_INTERRUPT_NUMBER interrupt_number
 # define FLD_CS cs
 # define FLD_IP ip
-#elif OS386
+#elif MODE_PROTECTED && __i386__
 typedef struct registers_t
 {
 	uint32_t gs;
@@ -738,7 +738,7 @@ static inline void enter_usermode(void)
 	movw	%%ss, %%ax\n\
 	movw	%%ax, %%ds\n\
 	movw	%%ax, %%es\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
-#elif OS386
+#elif MODE_PROTECTED && __i386__
 	asm volatile("\
 	movl	%%esp, %%eax\n\
 	pushl	%0\n\
@@ -837,7 +837,7 @@ static inline void setup_tables(void)
 	descriptor_set_gate(&ldt[SEL_CALL7 / 8], SEL_KERNEL_CS, 0/* TODO */, DESCRIPTOR_ACCESS_CALLGATE16 | DESCRIPTOR_ACCESS_CPL3);
 	descriptor_set_segment(&ldt[SEL_USER_CS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 	descriptor_set_segment(&ldt[SEL_USER_SS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
-#elif OS386
+#elif MODE_PROTECTED && __i386__
 	descriptor_set_segment(&gdt[SEL_KERNEL_CS / 8], 0, 0xFFFFFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_32BIT);
 	descriptor_set_segment(&gdt[SEL_KERNEL_SS / 8], 0, 0xFFFFFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_32BIT);
 	descriptor_set_segment(&gdt[SEL_USER_CS / 8], 0, 0xFFFFFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_32BIT);
@@ -870,7 +870,7 @@ static inline void setup_tables(void)
 #elif MODE_PROTECTED && __ia16__
 # define DESCRIPTOR_ACCESS_INTGATE DESCRIPTOR_ACCESS_INTGATE16 | DESCRIPTOR_ACCESS_CPL3
 # define KERNEL_SEGMENT SEL_KERNEL_CS
-#elif OS386
+#elif MODE_PROTECTED && __i386__
 # define DESCRIPTOR_ACCESS_INTGATE DESCRIPTOR_ACCESS_INTGATE32 | DESCRIPTOR_ACCESS_CPL3
 # define KERNEL_SEGMENT SEL_KERNEL_CS
 #elif OS64
@@ -1144,15 +1144,15 @@ static inline void setup_tables(void)
 #else
 	//memset(&tss, 0, sizeof tss);
 
-#if MODE_PROTECTED && __ia16__
+#if MODE_PROTECTED && (__ia16__ && !CPU_80386)
 	tss.sp0 = (size_t)system_stack + sizeof system_stack;
 	tss.ss0 = SEL_KERNEL_SS;
-#elif OS386
+#elif MODE_PROTECTED && (__i386__ || CPU_80386) && !__amd64__
 	tss.esp0 = (size_t)system_stack + sizeof system_stack;
 	tss.ss0 = SEL_KERNEL_SS;
 	tss.cs = SEL_USER_CS|3;
 	tss.ds = tss.es = tss.fs = tss.gs = SEL_USER_SS|3;
-#elif OS64
+#elif __amd64__
 	tss.rsp0 = (size_t)system_stack + sizeof system_stack;
 #endif
 

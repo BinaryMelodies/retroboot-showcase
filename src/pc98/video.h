@@ -50,11 +50,11 @@ static inline void screen_video_move_cursor(void)
 
 static inline void screen_init(void)
 {
-#if MODE_REAL
+#if MODE_REAL && __ia16__
 	screen_buffer = (unsigned short far *)0xA0000000;
 #elif MODE_PROTECTED && __ia16__
 	screen_buffer = (unsigned short far *)0x00180000;
-#elif defined OS386 || defined OS64
+#else
 	screen_buffer = (unsigned short far *)0x000A0000;
 #endif
 

@@ -186,7 +186,7 @@ typedef struct task_state_segment64_t
 
 #if __ia16__ && !CPU_80386
 typedef task_state_segment16_t task_state_segment_t;
-#elif OS386
+#elif __i386__ || CPU_80386
 typedef task_state_segment32_t task_state_segment_t;
 #elif OS64
 typedef task_state_segment64_t task_state_segment_t;

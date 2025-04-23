@@ -22,6 +22,8 @@
 # elif MODE_PROTECTED
 #  define OSNAME "OS/286"
 # endif
+#elif __i386__
+# define OSNAME "OS/386"
 #endif
 
 #if MODE_REAL
@@ -38,10 +40,7 @@
 # endif
 #endif
 
-#if defined OS386
-# define OSNAME "OS/386"
-//# define COMMENT " running in 32-bit protected mode"
-#elif defined OS64
+#if defined OS64
 # define OSNAME "OS/64"
 # define COMMENT " running in 64-bit long mode"
 #elif defined OS68000

@@ -271,7 +271,7 @@ read_sectors:
 	# Load CS with a protected mode descriptor
 	ljmp	$0x08, $pm_start
 .endif
-.if OS386
+.if MODE_PROTECTED && CPU_80386
 	# Turn off interrupts while setting up protected mode
 	cli
 	lgdt	gdtr
@@ -362,7 +362,7 @@ pm_start:
 	movb	$0, %al
 	rep	stosb
 .endif
-.if OS386
+.if MODE_PROTECTED && CPU_80386
 	.code32
 pm_start:
 	# Now we are in 32-bit protected mode
@@ -459,7 +459,7 @@ error_old_cpu:
 message_old_cpu:
 	.ascii	"Intel 80286 or newer expected"
 .endif
-.if OS386
+.if CPU_80386
 message_old_cpu:
 	.ascii	"Intel 80386 or newer expected"
 .endif
@@ -491,7 +491,7 @@ gdt:
 .endif
 gdt_end:
 .endif
-.if OS386
+.if MODE_PROTECTED && CPU_80386
 	.align	4, 0
 gdtr:
 	.word	gdt_end - gdt - 1
