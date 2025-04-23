@@ -16,8 +16,12 @@
 
 #include "video.h"
 
-#if CPU_8086
-# define OSNAME "OS/86"
+#if __ia16__
+# if MODE_REAL
+#  define OSNAME "OS/86"
+# elif MODE_PROTECTED
+#  define OSNAME "OS/286"
+# endif
 #endif
 
 #if MODE_REAL
@@ -26,14 +30,17 @@
 # else
 #  define COMMENT " running in 32-bit real mode" // note: not currently used
 # endif
+#elif MODE_PROTECTED
+# if __ia16__
+#  define COMMENT " running in 16-bit protected mode"
+# else
+#  define COMMENT " running in 32-bit protected mode"
+# endif
 #endif
 
-#if defined OS286
-# define OSNAME "OS/286"
-# define COMMENT " running in 16-bit protected mode"
-#elif defined OS386
+#if defined OS386
 # define OSNAME "OS/386"
-# define COMMENT " running in 32-bit protected mode"
+//# define COMMENT " running in 32-bit protected mode"
 #elif defined OS64
 # define OSNAME "OS/64"
 # define COMMENT " running in 64-bit long mode"

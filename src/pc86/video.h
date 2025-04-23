@@ -47,7 +47,7 @@ static inline void screen_init(void)
 {
 #if MODE_REAL
 	screen_buffer = (unsigned short far *)(*(char *)0x0449 != 0x07 ? 0xB8000000 : 0xB0000000);
-#elif defined OS286
+#elif MODE_PROTECTED && __ia16__
 	screen_buffer = (unsigned short far *)0x00180000;
 #elif defined OS386 || defined OS64
 	screen_buffer = (unsigned short far *)(*(char *)0x0449 != 0x07 ? 0x000B8000L : 0x000B0000L);

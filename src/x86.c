@@ -3,12 +3,12 @@
 #include "i8253.c"
 #include "keyboard.c"
 
-#if OS286 || OS386 || OS64
+#if !MODE_REAL
 enum
 {
 	SEL_KERNEL_CS = 0x08,
 	SEL_KERNEL_SS = 0x10, // must follow CS for SYSENTER and SYSCALL
-#if OS286
+#if __ia16__ && !CPU_80386
 	SEL_KERNEL_SCREEN = 0x18,
 	SEL_KERNEL_SEGMENT1 = 0x20, // used as source segment for huge transfers
 	SEL_KERNEL_SEGMENT2 = 0x28, // used as destination segment for huge transfers
@@ -74,7 +74,7 @@ asm( \
 );
 // there are no error codes pushed to stack in real mode
 # define DEFINE_ISR_ERROR_CODE DEFINE_ISR_NO_ERROR_CODE
-#elif OS286
+#elif MODE_PROTECTED && __ia16__
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
 void isr##__hex(void); \
 asm( \
@@ -425,7 +425,7 @@ asm(
 	"popw\t%ax\n\t"
 	"iretw"
 );
-#elif OS286
+#elif MODE_PROTECTED && __ia16__
 asm(
 	".global\tisr_common\n\t"
 	"isr_common:\n\t"
@@ -555,7 +555,7 @@ typedef struct registers_t
 # define FLD_INTERRUPT_NUMBER frame->interrupt_number
 # define FLD_CS frame->cs
 # define FLD_IP frame->ip
-#elif OS286
+#elif MODE_PROTECTED && __ia16__
 typedef struct registers_t
 {
 	uint16_t ds;
@@ -722,7 +722,7 @@ void interrupt_handler(registers_t * registers)
 
 static inline void enter_usermode(void)
 {
-#if OS286
+#if MODE_PROTECTED && __ia16__
 	asm volatile("\
 	movw	%%sp, %%ax\n\
 	pushw	%0\n\
@@ -818,7 +818,7 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 
 static inline void setup_tables(void)
 {
-#if OS286
+#if MODE_PROTECTED && __ia16__
 	descriptor_set_segment(&gdt[SEL_KERNEL_CS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 	descriptor_set_segment(&gdt[SEL_KERNEL_SS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 # if MACHINE_IBMPC
@@ -859,7 +859,7 @@ static inline void setup_tables(void)
 	descriptor_set_gate64((descriptor64_t *)&ldt[SEL_CALL7 / 8], SEL_KERNEL_CS, 0/* TODO */, DESCRIPTOR_ACCESS_CALLGATE64 | DESCRIPTOR_ACCESS_CPL3);
 #endif
 
-#if OS286 || OS386 || OS64
+#if !MODE_REAL
 	load_gdt(gdt, sizeof gdt, SEL_KERNEL_CS, SEL_KERNEL_SS, SEL_KERNEL_SS);
 	load_ldt(SEL_LDT);
 #endif
@@ -867,7 +867,7 @@ static inline void setup_tables(void)
 #if MODE_REAL
 # define DESCRIPTOR_ACCESS_INTGATE 0
 # define KERNEL_SEGMENT 0
-#elif OS286
+#elif MODE_PROTECTED && __ia16__
 # define DESCRIPTOR_ACCESS_INTGATE DESCRIPTOR_ACCESS_INTGATE16 | DESCRIPTOR_ACCESS_CPL3
 # define KERNEL_SEGMENT SEL_KERNEL_CS
 #elif OS386
@@ -1144,7 +1144,7 @@ static inline void setup_tables(void)
 #else
 	//memset(&tss, 0, sizeof tss);
 
-#if OS286
+#if MODE_PROTECTED && __ia16__
 	tss.sp0 = (size_t)system_stack + sizeof system_stack;
 	tss.ss0 = SEL_KERNEL_SS;
 #elif OS386
