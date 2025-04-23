@@ -1,7 +1,7 @@
 
-#if defined IBMPC
+#if MACHINE_IBMPC
 # define PORT_PS2_DATA     0x60
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 # define PORT_PS2_DATA     0x41
 #endif
 
@@ -11,7 +11,7 @@ static const struct
 	char shifted;
 } keyboard_scancode_table[256] =
 {
-#if defined IBMPC || defined ATARI
+#if MACHINE_IBMPC || MACHINE_ATARI
 	[0x01] = { '\33', '\33' },
 	[0x02] = { '1', '!' },
 	[0x03] = { '2', '@' },
@@ -67,7 +67,7 @@ static const struct
 	[0x35] = { '/', '?' },
 
 	[0x39] = { ' ', ' ' },
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 	[0x00] = { '`', '~' },
 	[0x01] = { '1', '!' },
 	[0x02] = { '2', '@' },
@@ -141,7 +141,7 @@ static inline void keyboard_buffer_push(char c)
 	keyboard_used = true;
 	if(keyboard_buffer_count < KEYBOARD_BUFFER_SIZE)
 	{
-#if !ATARI
+#if !MACHINE_ATARI
 		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) % KEYBOARD_BUFFER_SIZE] = c;
 #else
 		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) & (KEYBOARD_BUFFER_SIZE - 1)] = c;
@@ -167,7 +167,7 @@ static inline int keyboard_buffer_remove(void)
 			;
 		keyboard_used = true;
 		int c = keyboard_buffer[keyboard_buffer_pointer];
-#if !ATARI
+#if !MACHINE_ATARI
 		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) % KEYBOARD_BUFFER_SIZE;
 #else
 		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) & (KEYBOARD_BUFFER_SIZE - 1);
@@ -178,17 +178,17 @@ static inline int keyboard_buffer_remove(void)
 	}
 }
 
-#if defined IBMPC
+#if MACHINE_IBMPC
 # define PS2_SCANCODE_LSHIFT 0x2A
 # define PS2_SCANCODE_RSHIFT 0x36
 # define PS2_SCANCODE_RELEASED 0x80
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 # define PS2_SCANCODE_LSHIFT 0x70
 # define PS2_SCANCODE_RSHIFT 0x70
 # define PS2_SCANCODE_RELEASED 0x80
 #endif
 
-#if defined ATARI
+#if MACHINE_ATARI
 typedef struct acia_t
 {
 	uint8_t control, _0, data, _1;
@@ -204,7 +204,7 @@ typedef struct acia_t
 
 static inline void keyboard_interrupt_process(uint8_t scancode)
 {
-#if !AMIGA && !MACINTOSH && !X68000 // TODO
+#if !MACHINE_AMIGA && !MACHINE_MACINTOSH && !MACHINE_X68000 // TODO
 	if((scancode & PS2_SCANCODE_RELEASED) == 0)
 	{
 		// key pressed

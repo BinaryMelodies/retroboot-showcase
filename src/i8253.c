@@ -1,12 +1,12 @@
 
 // Intel 8253 programmable interval timer
 
-#if defined IBMPC
+#if MACHINE_IBMPC
 #define PORT_PIT_DATA0    0x40
 #define PORT_PIT_DATA1    (PORT_PIT_DATA0 + 1)
 #define PORT_PIT_DATA2    (PORT_PIT_DATA0 + 2)
 #define PORT_PIT_COMMAND  (PORT_PIT_DATA0 + 3)
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 #define PORT_PIT_DATA0    0x71
 #define PORT_PIT_DATA1    (PORT_PIT_DATA0 + 2)
 #define PORT_PIT_DATA2    (PORT_PIT_DATA0 + 4)

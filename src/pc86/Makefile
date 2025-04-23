@@ -5,10 +5,10 @@ DISKFILE=disk.img
 AS=ia16-elf-as
 CC=ia16-elf-gcc
 
-ASFLAGS=--defsym OS86=1 --defsym IBMPC=1
+ASFLAGS=--defsym OS86=1 --defsym MACHINE_IBMPC=1
 CFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -fno-delete-null-pointer-checks
 #CFLAGS+= -O2
-CFLAGS+= -Isrc/pc86 -DOS86=1 -DIBMPC=1 
+CFLAGS+= -Isrc/pc86 -DOS86=1 -DMACHINE_IBMPC=1
 LDFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
 DISKSIZE=1440

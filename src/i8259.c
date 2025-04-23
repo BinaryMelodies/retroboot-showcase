@@ -1,12 +1,12 @@
 
 // Intel 8259 programmable interrupt controller
 
-#if defined IBMPC
+#if MACHINE_IBMPC
 #define PORT_PIC1_COMMAND 0x20
 #define PORT_PIC2_COMMAND 0xA0
 #define PORT_PIC1_DATA    (PORT_PIC1_COMMAND + 1)
 #define PORT_PIC2_DATA    (PORT_PIC2_COMMAND + 1)
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 #define PORT_PIC1_COMMAND 0x00
 #define PORT_PIC2_COMMAND 0x08
 #define PORT_PIC1_DATA    (PORT_PIC1_COMMAND + 2)

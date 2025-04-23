@@ -23,16 +23,16 @@
 	.equ	OS64, 0
 .endif
 
-.ifdef	IBMPC
-	.equ	IBMPC, 1
+.ifdef	MACHINE_IBMPC
+	.equ	MACHINE_IBMPC, 1
 .else
-	.equ	IBMPC, 0
+	.equ	MACHINE_IBMPC, 0
 .endif
 
-.ifdef	NECPC98
-	.equ	NECPC98, 1
+.ifdef	MACHINE_NECPC98
+	.equ	MACHINE_NECPC98, 1
 .else
-	.equ	NECPC98, 0
+	.equ	MACHINE_NECPC98, 0
 .endif
 
 .macro	_descriptor	base, limit, attribute
@@ -87,7 +87,7 @@ _start:
 	movw	$0x1000, %sp
 
 	# Move boot sector to 0:0x5000
-.if IBMPC
+.if MACHINE_IBMPC
 	# From 0x7C00
 	xorw	%ax, %ax
 	movw	%ax, %ds
@@ -95,7 +95,7 @@ _start:
 	movw	%ax, %es
 .endif
 
-.if NECPC98
+.if MACHINE_NECPC98
 	# Move boot sector from 0x7C00 (IBM PC) or 0x1FE0:0 (or 0x1FC0:0) (NEC PC-98) to 0:0x5000
 	movw	%cs, %ax
 	movw	%ax, %ds
@@ -166,7 +166,7 @@ _start:
 .endif
 
 read_sectors:
-.if IBMPC
+.if MACHINE_IBMPC
 	# ES:BX contains the destination buffer, 0:0x7E00
 	movw	$_start + 0x200, %bx
 	# AH contains the BIOS function number 0x02, AL contains the sector count
@@ -193,7 +193,7 @@ read_sectors:
 
 .complete:
 .endif
-.if NECPC98
+.if MACHINE_NECPC98
 	# ES:BP contains the destination buffer, 0:0x7E00
 	movw	$_start + 0x200, %bp
 	# BX contains the read size
@@ -211,19 +211,19 @@ read_sectors:
 
 .if !OS86
 	# Enable the A20 line
-.if IBMPC
+.if MACHINE_IBMPC
 	inb	$0x92, %al
 	orb	$0x02, %al
 	outb	%al, $0x92
 .endif
-.if NECPC98
+.if MACHINE_NECPC98
 	movb	$0x00, %al
 	outb	%al, $0xF2
 .endif
 .endif
 
 .if OS286
-.if IBMPC
+.if MACHINE_IBMPC
 	# Check for MDA screen, modify GDT selector base 0x18 to 0xB0000
 	cmpb	$0x07, (0x0449)
 	jne	1f
@@ -379,7 +379,7 @@ pm_start:
 .if !OS86
 	.code16
 error_old_cpu:
-.if IBMPC
+.if MACHINE_IBMPC
 	# DS=0
 	cmpb	$0x07, 0x449
 	jne	.cga
@@ -400,7 +400,7 @@ error_old_cpu:
 	stosw
 	loop	2b
 .endif
-.if NECPC98
+.if MACHINE_NECPC98
 	movw	$0xA000, %di
 	movw	%di, %es
 	xorw	%di, %di
@@ -453,10 +453,10 @@ gdt:
 	descriptor	0, 0xFFFF, DESC_CODE | DESC_16BIT
 	descriptor	0, 0xFFFF, DESC_DATA | DESC_16BIT
 	# A separate selector to access the VGA text buffer
-.if IBMPC
+.if MACHINE_IBMPC
 	descriptor	0xB8000, 0xFFFF, DESC_DATA | DESC_16BIT
 .endif
-.if NECPC98
+.if MACHINE_NECPC98
 	descriptor	0xA0000, 0xFFFF, DESC_DATA | DESC_16BIT
 .endif
 gdt_end:

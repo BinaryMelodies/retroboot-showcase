@@ -323,7 +323,7 @@ void interrupt_handler(registers_t * registers)
 		timer_interrupt_handler(registers);
 		break;
 #endif
-#if ATARI
+#if MACHINE_ATARI
 	case 0x46: // keyboard interrupt
 		keyboard_interrupt_handler(registers);
 		break;
@@ -339,7 +339,7 @@ void interrupt_handler(registers_t * registers)
 
 static inline void keyboard_interrupt_handler(registers_t * registers)
 {
-#if ATARI
+#if MACHINE_ATARI
 	(void) registers;
 
 	do
@@ -362,15 +362,15 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 
 static inline void setup_tables(void)
 {
-#if ATARI
+#if MACHINE_ATARI
 	acia.control = 3; // reset
 	acia.control = 0x96;
 #endif
 
-#if !ATARI
+/*
 	set_interrupt(0x00, isr0x00);
 	set_interrupt(0x01, isr0x01);
-#endif
+*/
 	set_interrupt(0x02, isr0x02);
 	set_interrupt(0x03, isr0x03);
 	set_interrupt(0x04, isr0x04);
@@ -397,7 +397,7 @@ static inline void setup_tables(void)
 	set_interrupt(0x19, isr0x19);
 	set_interrupt(0x1A, isr0x1A);
 	set_interrupt(0x1B, isr0x1B);
-#if !ATARI
+#if !MACHINE_ATARI
 	set_interrupt(0x1C, isr0x1C); // TODO: vblank, unable to return
 #endif
 	set_interrupt(0x1D, isr0x1D);

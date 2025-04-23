@@ -681,9 +681,9 @@ void interrupt_handler(registers_t * registers)
 
 	screen_x = 0;
 	screen_y = SCREEN_HEIGHT - 1;
-#if defined IBMPC
+#if MACHINE_IBMPC
 	screen_attribute = 0x4E; // yellow on red
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 	screen_attribute = 0x41; // red on black
 #endif
 
@@ -701,12 +701,12 @@ void interrupt_handler(registers_t * registers)
 
 	switch(registers->FLD_INTERRUPT_NUMBER)
 	{
-#if defined IBMPC || defined NECPC98
+#if MACHINE_IBMPC || MACHINE_NECPC98
 	case IRQ0 + 0: // timer interrupt
 		timer_interrupt_handler(registers);
 		break;
 #endif
-#if defined IBMPC || defined NECPC98
+#if MACHINE_IBMPC || MACHINE_NECPC98
 	case IRQ0 + 1: // keyboard interrupt
 		keyboard_interrupt_handler(registers);
 		break;
@@ -787,9 +787,9 @@ static inline void timer_interrupt_handler(registers_t * registers)
 
 	screen_x = SCREEN_WIDTH - 1;
 	screen_y = 0;
-#if defined IBMPC
+#if MACHINE_IBMPC
 	screen_attribute = 0x0F; // white on black
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 	screen_attribute = 0xE1; // white on black
 #endif
 	screen_putchar("/-\\|"[timer_tick & 3]);
@@ -800,15 +800,15 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 	(void) registers;
 
 	uint8_t scancode;
-#if defined IBMPC || defined NECPC98
+#if MACHINE_IBMPC || MACHINE_NECPC98
 	scancode = inp(PORT_PS2_DATA);
 #endif
 
 	screen_x = SCREEN_WIDTH - 2;
 	screen_y = 1;
-#if defined IBMPC
+#if MACHINE_IBMPC
 	screen_attribute = 0x2F; // white on blue
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 	screen_attribute = 0x25; // black on blue
 #endif
 	screen_puthex(scancode);
@@ -821,12 +821,12 @@ static inline void setup_tables(void)
 #if OS286
 	descriptor_set_segment(&gdt[SEL_KERNEL_CS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 	descriptor_set_segment(&gdt[SEL_KERNEL_SS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
-# if defined IBMPC
+# if MACHINE_IBMPC
 	if(*(char *)0x0449 != 0x07)
 		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B8000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 	else
 		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B0000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
-# elif defined NECPC98
+# elif MACHINE_NECPC98
 	descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0A0000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 # endif
 	descriptor_set_segment(&gdt[SEL_KERNEL_SEGMENT1 / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);

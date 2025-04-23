@@ -36,17 +36,17 @@
 # define COMMENT ""
 #endif
 
-#if defined IBMPC
+#if MACHINE_IBMPC
 # define SYSNAME "IBM PC"
-#elif defined NECPC98
+#elif MACHINE_NECPC98
 # define SYSNAME "NEC PC-98"
-#elif defined ATARI
+#elif MACHINE_ATARI
 # define SYSNAME "Atari ST"
-#elif defined X68000
+#elif MACHINE_X68000
 # define SYSNAME "Sharp X68000"
-#elif defined AMIGA
+#elif MACHINE_AMIGA
 # define SYSNAME "Commodore Amiga"
-#elif defined MACINTOSH
+#elif MACHINE_MACINTOSH
 # define SYSNAME "Apple Macintosh"
 #endif
 
@@ -136,7 +136,7 @@ static inline void screen_scroll(int lines)
 }
 #endif
 
-#if defined IBMPC || defined NECPC98 || USE_VGA_EMULATION
+#if MACHINE_IBMPC || MACHINE_NECPC98 || USE_VGA_EMULATION
 static inline void screen_putchar(int c)
 {
 	switch(c)
@@ -262,7 +262,7 @@ static inline void test_scroll(void)
 	for(int i = 2; i < SCREEN_HEIGHT; i++)
 		screen_putstr("scroll\n");
 
-#if USE_VGA_EMULATION || IBMPC || NECPC98
+#if USE_VGA_EMULATION || MACHINE_IBMPC || MACHINE_NECPC98
 	screen_y = 2;
 #endif
 }
@@ -280,7 +280,7 @@ noreturn void kmain(void)
 {
 	uint16_t intval = disable_interrupts();
 
-#if !AMIGA && !X68000 && !MACINTOSH // TODO
+#if !MACHINE_AMIGA && !MACHINE_X68000 && !MACHINE_MACINTOSH // TODO
 	setup_tables();
 #endif
 
@@ -292,15 +292,15 @@ noreturn void kmain(void)
 
 	test_long_line();
 	test_puthex();
-#if !ATARI // TODO: 68000 pcrel modsi3 does not work
+#if !MACHINE_ATARI // TODO: 68000 pcrel modsi3 does not work
 	test_putdec();
 #endif
 
-#if !AMIGA && !X68000 && !MACINTOSH // TODO
+#if !MACHINE_AMIGA && !MACHINE_X68000 && !MACHINE_MACINTOSH // TODO
 	enable_interrupts(intval);
 #endif
 
-#if MACINTOSH
+#if MACHINE_MACINTOSH
 	if(screen_depth == 1) // TODO: switching to user mode does not work yet on Macintosh II, this check does not work on a MacII with a monochrome display
 #endif
 	enter_usermode();
@@ -314,7 +314,7 @@ noreturn void kmain(void)
 
 	for(;;)
 	{
-#if !AMIGA && !X68000 && !MACINTOSH // TODO
+#if !MACHINE_AMIGA && !MACHINE_X68000 && !MACHINE_MACINTOSH // TODO
 		screen_putchar(keyboard_getch());
 		if(screen_y == SCREEN_HEIGHT - 1)
 		{

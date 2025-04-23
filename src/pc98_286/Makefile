@@ -5,10 +5,10 @@ DISKFILE=disk.img
 AS=ia16-elf-as
 CC=ia16-elf-gcc
 
-ASFLAGS=--defsym OS286=1 --defsym NECPC98=1
+ASFLAGS=--defsym OS286=1 --defsym MACHINE_NECPC98=1
 CFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -march=i80286 -mprotected-mode
 #CFLAGS+= -O2
-CFLAGS+= -Isrc/pc98 -DOS286=1 -DNECPC98=1 
+CFLAGS+= -Isrc/pc98 -DOS286=1 -DMACHINE_NECPC98=1 
 LDFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
 DISKSIZE=1440
