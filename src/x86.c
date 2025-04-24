@@ -678,9 +678,12 @@ void interrupt_handler(registers_t * registers)
 	screen_x = 0;
 	screen_y = SCREEN_HEIGHT - 1;
 #if MACHINE_IBMPC
-	screen_attribute = 0x4E; // yellow on red
+	screen_attribute =
+		screen_mode == SCREEN_MODE_MDA
+			? SCREEN_ATTR_MDA_INVERTED
+			: SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_RED;
 #elif MACHINE_NECPC98
-	screen_attribute = 0x41; // red on black
+	screen_attribute = SCREEN_ATTR_RED;
 #endif
 
 	screen_putstr("Interrupt 0x");
@@ -727,9 +730,12 @@ static inline void timer_interrupt_handler(registers_t * registers)
 	screen_x = SCREEN_WIDTH - 1;
 	screen_y = 0;
 #if MACHINE_IBMPC
-	screen_attribute = 0x0F; // white on black
+	screen_attribute =
+		screen_mode == SCREEN_MODE_MDA
+			? SCREEN_ATTR_MDA_NORMAL | SCREEN_ATTR_FG_LIGHT
+			: SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLACK;
 #elif MACHINE_NECPC98
-	screen_attribute = 0xE1; // white on black
+	screen_attribute = SCREEN_ATTR_WHITE;
 #endif
 	screen_putchar("/-\\|"[timer_tick & 3]);
 }
@@ -746,9 +752,12 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 	screen_x = SCREEN_WIDTH - 2;
 	screen_y = 1;
 #if MACHINE_IBMPC
-	screen_attribute = 0x2F; // white on blue
+	screen_attribute =
+		screen_mode == SCREEN_MODE_MDA
+			? SCREEN_ATTR_MDA_NORMAL | SCREEN_ATTR_FG_LIGHT
+			: SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLUE;
 #elif MACHINE_NECPC98
-	screen_attribute = 0x25; // black on blue
+	screen_attribute = SCREEN_ATTR_BLUE | SCREEN_ATTR_INVERTED;
 #endif
 	screen_puthex(scancode);
 
