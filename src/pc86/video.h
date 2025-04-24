@@ -34,17 +34,38 @@ static inline void screen_scroll(int count)
 	}
 }
 
+static uint16_t screen_port_base;
+
 static inline void screen_video_move_cursor(void)
 {
 	uint16_t location = screen_y * SCREEN_WIDTH + screen_x;
-	outp(0x3D4, 0x0E);
-	outp(0x3D5, location >> 8);
-	outp(0x3D4, 0x0F);
-	outp(0x3D5, location);
+	outp(screen_port_base,     0x0E);
+	outp(screen_port_base + 1, location >> 8);
+	outp(screen_port_base,     0x0F);
+	outp(screen_port_base + 1, location);
+}
+
+static inline void screen_video_set_cursor_size(int start, int end)
+{
+	outb(screen_port_base,     0x0A);
+	outb(screen_port_base + 1, (inb(screen_port_base + 1) & 0xC0) | start);
+	outb(screen_port_base,     0x0B);
+	outb(screen_port_base + 1, (inb(screen_port_base + 1) & 0xE0) | end);
 }
 
 static inline void screen_init(void)
 {
+	if(*(char *)0x0449 != 0x07)
+	{
+		screen_port_base =  0x3D4;
+		//screen_video_set_cursor_size(6, 7); // TODO: this only works for CGA
+	}
+	else
+	{
+		screen_port_base =  0x3B4;
+		screen_video_set_cursor_size(11, 12);
+	}
+
 #if MODE_REAL && __ia16__
 	screen_buffer = (unsigned short far *)(*(char *)0x0449 != 0x07 ? 0xB8000000 : 0xB0000000);
 #elif MODE_PROTECTED && __ia16__
