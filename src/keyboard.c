@@ -228,6 +228,9 @@ static inline void keyboard_interrupt_process(uint8_t scancode)
 			keyboard_shift = false;
 		}
 	}
+#else
+	(void) scancode;
+	// TODO
 #endif
 }
 

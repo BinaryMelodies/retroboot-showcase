@@ -339,9 +339,9 @@ void interrupt_handler(registers_t * registers)
 
 static inline void keyboard_interrupt_handler(registers_t * registers)
 {
-#if MACHINE_ATARI
 	(void) registers;
 
+#if MACHINE_ATARI // TODO: other platforms
 	do
 	{
 		if((acia.control & ACIA_IRQ) != 0)

@@ -312,6 +312,8 @@ noreturn void kmain(void)
 
 #if !MACHINE_AMIGA && !MACHINE_X68000 && !MACHINE_MACINTOSH // TODO
 	enable_interrupts(intval);
+#else
+	(void) intval;
 #endif
 
 #if MACHINE_MACINTOSH
