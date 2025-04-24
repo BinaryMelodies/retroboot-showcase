@@ -310,7 +310,7 @@ void interrupt_handler(registers_t * registers)
 
 	screen_x = 0;
 	screen_y = SCREEN_HEIGHT - 1;
-	screen_attribute = 0x4E; // yellow on red
+	screen_attribute = SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_RED;
 
 	screen_putstr("Interrupt 0x");
 	screen_puthex(registers->interrupt_number);
@@ -352,7 +352,7 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 
 			screen_x = SCREEN_WIDTH - 2;
 			screen_y = 1;
-			screen_attribute = 0x2F; // white on blue
+			screen_attribute = SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLUE;
 			screen_puthex(scancode);
 
 			keyboard_interrupt_process(scancode);

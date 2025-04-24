@@ -17,7 +17,7 @@ LDSCRIPT=src/pc86/linker.ld
 BOOT=src/pc86/boot.s
 FIXIMAGE=python3 makeboot.py -ibm
 
-INCLUDES=src/pc86/video.h src/x86.c src/i8259.c src/i8253.c src/i86.h src/system.h src/pc86/scancode.c src/pc86/keyboard.c src/pc86/keyproc.c
+INCLUDES=src/pc86/video.h src/pc86/colors.h src/x86.c src/i8259.c src/i8253.c src/i86.h src/system.h src/pc86/scancode.c src/pc86/keyboard.c src/pc86/keyproc.c
 
 include src/Makefile.template
 

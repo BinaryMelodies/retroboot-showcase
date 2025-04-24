@@ -3,6 +3,8 @@
 
 #define USE_VGA_EMULATION 1
 
+#include "../pc86/colors.h"
+
 #define CUSTOM 0xDFF000
 #define COP1LCH (*(volatile uint16_t *)(CUSTOM + 0x080))
 #define COPJMP1 (*(volatile uint16_t *)(CUSTOM + 0x088))
@@ -35,7 +37,7 @@ enum
 static uint16_t copper[1024] __attribute__((section("chipram,\"aw\",@nobits\n#")));
 static uint8_t screen_memory[PLANE_BYTES * 4] __attribute__((section("chipram,\"aw\",@nobits\n#")));
 
-# define DEFAULT_SCREEN_ATTRIBUTE 0x1E // yellow on blue
+# define DEFAULT_SCREEN_ATTRIBUTE (SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_BLUE)
 
 static uint8_t screen_x, screen_y;
 static uint8_t screen_attribute = DEFAULT_SCREEN_ATTRIBUTE;
@@ -133,5 +135,7 @@ static inline size_t screen_get_memory_offset(uint8_t channel, uint8_t line)
 {
 	return PLANE_BYTES * channel + LINE_BYTES * line;
 }
+
+# include "../atari/vgasim.c"
 
 #endif // _VIDEO_H

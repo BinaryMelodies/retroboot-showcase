@@ -29,6 +29,7 @@ enum
 
 static uint8_t screen_x, screen_y;
 static uint8_t screen_attribute = DEFAULT_SCREEN_ATTRIBUTE;
+
 static uint16_t far * screen_buffer;
 
 static inline void screen_setchar(uint8_t c)

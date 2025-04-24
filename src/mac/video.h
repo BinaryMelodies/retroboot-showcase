@@ -3,6 +3,8 @@
 
 #define USE_VGA_EMULATION 1
 
+#include "../pc86/colors.h"
+
 static uint16_t screen_width, screen_height;
 static uint8_t screen_depth;
 
@@ -27,7 +29,7 @@ enum
 # define SCREEN_WIDTH_MAX (640/FONT_WIDTH) // Macintosh II
 # define SCREEN_HEIGHT_MAX (480/FONT_HEIGHT) // Macintosh II
 
-# define DEFAULT_SCREEN_ATTRIBUTE 0x1E // yellow on blue
+# define DEFAULT_SCREEN_ATTRIBUTE (SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_BLUE)
 
 static uint8_t screen_x, screen_y;
 static uint8_t screen_attribute = DEFAULT_SCREEN_ATTRIBUTE;
@@ -152,5 +154,7 @@ static inline void screen_drawchar(int x, int y, int c, int a)
 		}
 	}
 }
+
+#include "../atari/vgasim.c"
 
 #endif // _VIDEO_H

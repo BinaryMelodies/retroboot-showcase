@@ -22,10 +22,14 @@ static inline void bios_putchar(int c)
 }
 
 #if USE_VGA_EMULATION
-# define DEFAULT_SCREEN_ATTRIBUTE 0x1E // yellow on blue
+
+#include "../pc86/colors.h"
+
+# define DEFAULT_SCREEN_ATTRIBUTE (SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_BLUE)
 
 static uint8_t screen_x, screen_y;
 static uint8_t screen_attribute = DEFAULT_SCREEN_ATTRIBUTE;
+
 static uint16_t * screen_memory;
 
 static inline void screen_init_palette(void);
@@ -101,12 +105,15 @@ static inline size_t screen_get_memory_offset(uint8_t channel, uint8_t line)
 	return 2 * channel + 160 * line;
 }
 
+# include "vgasim.c"
+
 #else
 
 static inline void screen_init(void)
 {
 }
 
+# define screen_putchar_defined 1
 static inline void screen_putchar(int c)
 {
 	if(c == '\n')
