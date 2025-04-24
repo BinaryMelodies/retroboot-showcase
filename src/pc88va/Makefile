@@ -21,8 +21,8 @@ LDSCRIPT=src/pc88va/linker.ld
 BOOT=src/pc86/boot.s
 FIXIMAGE=./ignore
 
-#INCLUDES=src/pc88va/video.h src/x86.c src/i8259.c src/i8253.c src/i86.h src/system.h src/pc88va/scancode.c src/pc88va/keyboard.c src/pc86/keyproc.c src/pc86/timer.c
-INCLUDES=src/pc88va/video.h src/x86.c src/i8259.c src/i8253.c src/i86.h src/system.h
+INCLUDES=src/pc88va/video.h src/x86.c src/pc88va/irq.c src/i8259.c src/i8253.c src/i86.h src/system.h src/pc98/scancode.c src/pc88va/keyboard.c src/pc86/keyproc.c
+#src/pc86/timer.c
 
 include src/Makefile.template
 

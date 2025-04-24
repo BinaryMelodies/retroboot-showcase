@@ -1,18 +1,6 @@
 
 // Intel 8259 programmable interrupt controller
 
-#if MACHINE_IBMPC
-#define PORT_PIC1_COMMAND 0x20
-#define PORT_PIC2_COMMAND 0xA0
-#define PORT_PIC1_DATA    (PORT_PIC1_COMMAND + 1)
-#define PORT_PIC2_DATA    (PORT_PIC2_COMMAND + 1)
-#elif MACHINE_NECPC98
-#define PORT_PIC1_COMMAND 0x00
-#define PORT_PIC2_COMMAND 0x08
-#define PORT_PIC1_DATA    (PORT_PIC1_COMMAND + 2)
-#define PORT_PIC2_DATA    (PORT_PIC2_COMMAND + 2)
-#endif
-
 #define PIC_ICW1_ICW4 0x01
 #define PIC_ICW1_INIT 0x10
 #define PIC_ICW4_8086 0x01

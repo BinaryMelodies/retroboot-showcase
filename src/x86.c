@@ -7,10 +7,12 @@ enum
 	IRQ8 = IRQ0 + 8,
 };
 
+#include "irq.c"
 #if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
-#include "i8259.c"
 #include "i8253.c"
+#endif
 #include "keyboard.c"
+#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
 #include "timer.c"
 #endif
 
@@ -396,8 +398,8 @@ DEFINE_ISR_NO_ERROR_CODE(0xFF)
 asm(
 	".global\tisr_common\n\t"
 	"isr_common:\n\t"
-	"movw\t%ss, system_stack + 512 - 2\n\t"
-	"movw\t%sp, system_stack + 512 - 4\n\t"
+	"movw\t%ss, %cs:system_stack + 512 - 2\n\t"
+	"movw\t%sp, %cs:system_stack + 512 - 4\n\t"
 	"xorw\t%ax, %ax\n\t"
 	"movw\t%ax, %ss\n\t"
 	"movw\t$system_stack + 512 - 4, %sp\n\t"
@@ -663,7 +665,6 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 
 void interrupt_handler(registers_t * registers)
 {
-#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
 	if(IRQ8 <= registers->FLD_INTERRUPT_NUMBER && registers->FLD_INTERRUPT_NUMBER < IRQ8 + 8)
 	{
 		outp(PORT_PIC2_COMMAND, PIC_EOI);
@@ -673,7 +674,6 @@ void interrupt_handler(registers_t * registers)
 	{
 		outp(PORT_PIC1_COMMAND, PIC_EOI);
 	}
-#endif
 
 	uint8_t old_screen_x = screen_x;
 	uint8_t old_screen_y = screen_y;
@@ -706,7 +706,7 @@ void interrupt_handler(registers_t * registers)
 
 	switch(registers->FLD_INTERRUPT_NUMBER)
 	{
-#if IRQ_TIMER
+#ifdef IRQ_TIMER
 	case IRQ_TIMER: // timer interrupt
 		timer_interrupt_handler(registers);
 		break;
@@ -1066,8 +1066,12 @@ static inline void setup_tables(void)
 	load_tss(SEL_TSS);
 #endif // MODE_REAL
 
-#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
+#if MACHINE_NECPC88VA
+	outb(0x1580, 0); // switch to 8259 mode, data byte is not relevant
+#endif
 	i8259_setup(IRQ0, IRQ8);
+
+#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
 	i8253_setup(20);
 #endif
 }

@@ -316,8 +316,9 @@ noreturn void kmain(void)
 	else
 		screen_putstr("Running in user mode\n");
 
-	test_interrupts();
+//	test_interrupts();
 
+screen_putchar('?');
 	for(;;)
 	{
 #if !MACHINE_AMIGA && !MACHINE_X68000 && !MACHINE_MACINTOSH // TODO
