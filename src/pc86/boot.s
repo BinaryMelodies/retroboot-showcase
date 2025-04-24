@@ -180,10 +180,10 @@ _start:
 
 read_sectors:
 .if MACHINE_IBMPC
-	# ES:BX contains the destination buffer, 0:0x5200
-	movw	$_start + 0x200, %bx
+	# ES:BX contains the destination buffer, 0:0x5000 + BOOT_BLOCK_SIZE
+	movw	$_start + BOOT_BLOCK_SIZE, %bx
 	# AH contains the BIOS function number 0x02, AL contains the sector count
-	movw	$0x0200 + (sector_count - 1), %ax
+	movw	$0x0200 + sector_count - 1, %ax
 	# Access is according to cylinder:head:sector
 	# CH contains the cylinder number, CL the 1 based sector number
 	# First sector is already in memory, so we start from 2
@@ -207,29 +207,30 @@ read_sectors:
 .complete:
 .endif
 .if MACHINE_NECPC98
-	# ES:BP contains the destination buffer, 0:0x5200 or 0:0x5400
-	movw	$_start + 0x200, %bp
+	# ES:BP contains the destination buffer, 0:0x5000 + BOOT_BLOCK_SIZE
+	movw	$_start + BOOT_BLOCK_SIZE, %bp
 	# BX contains the read size
-	movw	$image_size - 512, %bx
+	movw	$image_size - BOOT_BLOCK_SIZE, %bx
 	# Access is according to cylinder:head:sector
 	# DH contains the head number, DL the 1 based sector number
 	# First sector is already in memory, so we start from 2
 	movw	$0x0002, %dx
 	# CH contains the sector size (0: 128, 1: 256, 2: 512, 3: 1024), CL contains the cylinder number in the low 6 bits
-	movw	$0x0200, %cx
+	movb	$SECTOR_SIZE_SHIFT - 7, %ch
+	movb	$0, %cl
 	# AH contains the BIOS function number 0x06, AL contains the device type, 0x30
 	movw	$0x0630, %ax
 	int	$0x1B
 .endif
 .if MACHINE_NECPC88VA
-	# ES:BP contains the destination buffer, 0:0x5400
-	movw	$_start + 0x400, %bp
+	# ES:BP contains the destination buffer, 0:0x5000 + BOOT_BLOCK_SIZE
+	movw	$_start + BOOT_BLOCK_SIZE, %bp
 	# AL contains the sector count, AH contains the BIOS function number 0x01
 	movw	$0x0100 + sector_count - 1, %ax
 	# Access is according to cylinder:head:sector
 	# DH contains the 1 based sector number number, DL the sector size (0: 128, 1: 256, 2: 512, 3: 1024)
 	# First sector is already in memory, so we start from 2
-	movw	$0x0203, %dx
+	movw	$0x0200 | (SECTOR_SIZE_SHIFT - 7), %dx
 	# CH contains the drive number, CL the track number (cylinder * 2 + head)
 	movw	$0x0000, %cx
 	int	$0x80
