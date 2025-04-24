@@ -11,24 +11,6 @@
 	.equ	MODE_PROTECTED, 0
 .endif
 
-.ifdef	CPU_8086
-	.equ	CPU_8086, 1
-.else
-	.equ	CPU_8086, 0
-.endif
-
-.ifdef	CPU_80286
-	.equ	CPU_80286, 1
-.else
-	.equ	CPU_80286, 0
-.endif
-
-.ifdef	CPU_80386
-	.equ	CPU_80386, 1
-.else
-	.equ	CPU_80386, 0
-.endif
-
 .ifdef	BITS16
 	.equ	BITS16, 1
 .else
@@ -151,7 +133,7 @@ _start:
 	cmp	$0xF000, %ax
 	je	error_old_cpu
 
-.if BITS32 || CPU_80386
+.if BITS32
 	# Check for at least 386 support, otherwise no 32-bit mode or registers are available
 	or	$0xF000, %cx
 	pushw	%cx
@@ -246,7 +228,7 @@ read_sectors:
 .endif
 .endif
 
-.if MODE_PROTECTED && CPU_80286
+.if MODE_PROTECTED && BITS16
 .if MACHINE_IBMPC
 	# Check for MDA screen, modify GDT selector base 0x18 to 0xB0000
 	cmpb	$0x07, (0x0449)
@@ -265,7 +247,7 @@ read_sectors:
 	# Load CS with a protected mode descriptor
 	ljmp	$0x08, $pm_start
 .endif
-.if MODE_PROTECTED && CPU_80386
+.if BITS32
 	# Turn off interrupts while setting up protected mode
 	cli
 	lgdt	gdtr
@@ -449,11 +431,11 @@ error_old_cpu:
 	jmp	0b
 .endif
 
-.if CPU_80286
+.if MODE_PROTECTED && BITS16
 message_old_cpu:
 	.ascii	"Intel 80286 or newer expected"
 .endif
-.if CPU_80386
+.if BITS32
 message_old_cpu:
 	.ascii	"Intel 80386 or newer expected"
 .endif

@@ -1144,10 +1144,10 @@ static inline void setup_tables(void)
 #else
 	//memset(&tss, 0, sizeof tss);
 
-#if MODE_PROTECTED && (__ia16__ && !CPU_80386)
+#if __ia16__
 	tss.sp0 = (size_t)system_stack + sizeof system_stack;
 	tss.ss0 = SEL_KERNEL_SS;
-#elif MODE_PROTECTED && (__i386__ || CPU_80386) && !__amd64__
+#elif __i386__
 	tss.esp0 = (size_t)system_stack + sizeof system_stack;
 	tss.ss0 = SEL_KERNEL_SS;
 	tss.cs = SEL_USER_CS|3;
@@ -1157,7 +1157,7 @@ static inline void setup_tables(void)
 #endif
 
 	load_tss(SEL_TSS);
-#endif
+#endif // MODE_REAL
 
 	i8259_setup(IRQ0, IRQ8);
 	i8253_setup(20);

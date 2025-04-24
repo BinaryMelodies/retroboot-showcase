@@ -17,7 +17,7 @@ typedef uint32_t address_t;
 typedef uint64_t address_t;
 #endif
 
-#if __ia16__ && !CPU_80386
+#if __ia16__
 typedef uint16_t limit_t;
 #else
 typedef uint32_t limit_t;
@@ -34,7 +34,7 @@ typedef struct segment_descriptor_t
 	uint16_t limit0;
 	uint32_t base0 : 24;
 	uint8_t access;
-#if __ia16__ && !CPU_80386
+#if __ia16__
 	uint16_t reserved;
 #else
 	uint8_t limit1 : 4;
@@ -54,7 +54,7 @@ typedef union descriptor_t
 		uint16_t selector;
 		uint8_t parameter;
 		uint8_t access;
-#if __ia16__ && !CPU_80386
+#if __ia16__
 		uint16_t reserved;
 #else
 		uint16_t offset1;
@@ -184,9 +184,9 @@ typedef struct task_state_segment64_t
 } __attribute__((packed)) task_state_segment64_t;
 #endif
 
-#if __ia16__ && !CPU_80386
+#if __ia16__
 typedef task_state_segment16_t task_state_segment_t;
-#elif __i386__ || CPU_80386
+#elif __i386__
 typedef task_state_segment32_t task_state_segment_t;
 #elif __amd64__
 typedef task_state_segment64_t task_state_segment_t;
@@ -224,14 +224,14 @@ enum
 	DESCRIPTOR_FLAGS_G = 0x80,
 };
 
-#if __ia16__ && !CPU_80386
+#if __ia16__
 // 286 does not use the flags parameter, drop the argument
 # define descriptor_set_segment(__descriptor, __base, __limit, __attributes, __flags) descriptor_set_segment(__descriptor, __base, __limit, __attributes)
 #endif
 
 static inline void descriptor_set_segment(descriptor_t * descriptor, uint32_t base, limit_t limit, uint8_t access, uint8_t flags)
 {
-#if !(__ia16__ && !CPU_80386)
+#if !__ia16__
 	if(limit > 0xFFF)
 	{
 		flags |= DESCRIPTOR_FLAGS_G;
@@ -245,7 +245,7 @@ static inline void descriptor_set_segment(descriptor_t * descriptor, uint32_t ba
 	descriptor->segment.limit0 = limit;
 	descriptor->segment.base0 = base;
 	descriptor->segment.access = access;
-#if __ia16__ && !CPU_80386
+#if __ia16__
 	descriptor->segment.reserved = 0;
 #else
 	descriptor->segment.limit1 = limit >> 16;
@@ -282,7 +282,7 @@ static inline void descriptor_set_gate32(descriptor_t * descriptor, uint16_t sel
 	descriptor->gate.offset0 = offset;
 	descriptor->gate.selector = selector;
 	descriptor->gate.access = access;
-#if __ia16__ && !CPU_80386
+#if __ia16__
 	descriptor->gate.reserved = 0;
 #else
 	descriptor->gate.offset1 = offset >> 16;
