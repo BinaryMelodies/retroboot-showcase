@@ -290,6 +290,9 @@ static inline void test_interrupts(void)
 #endif
 }
 
+static char system_stack[512] __attribute__((aligned(8)));
+//static char user_stack[512] __attribute__((aligned(8)));
+
 noreturn void kmain(void)
 {
 	uint16_t intval = disable_interrupts();
@@ -319,7 +322,11 @@ noreturn void kmain(void)
 #if MACHINE_MACINTOSH
 	if(screen_depth == 1) // TODO: switching to user mode does not work yet on Macintosh II, this check does not work on a MacII with a monochrome display
 #endif
-	enter_usermode();
+#if !MODE_REAL && (__ia16__ || __i386__ || __amd64__)
+	enter_usermode(SEL_USER_CS|3, SEL_USER_SS|3);
+#elif __m68k__
+	enter_usermode((size_t)system_stack + sizeof system_stack);
+#endif
 
 	if(is_system_mode())
 		screen_putstr("Running in system mode\n");

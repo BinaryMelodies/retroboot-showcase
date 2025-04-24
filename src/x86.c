@@ -387,6 +387,8 @@ DEFINE_ISR_NO_ERROR_CODE(0xFD)
 DEFINE_ISR_NO_ERROR_CODE(0xFE)
 DEFINE_ISR_NO_ERROR_CODE(0xFF)
 
+/*extern*/ static char system_stack[512];
+
 #if MODE_REAL
 asm(
 	".global\tisr_common\n\t"
@@ -522,7 +524,6 @@ asm(
 );
 #endif
 
-
 #if MODE_REAL
 typedef struct call_frame_t
 {
@@ -645,9 +646,6 @@ typedef struct registers_t
 # define set_interrupt(__interrupt_number, __selector, __offset, __access) set_interrupt(__interrupt_number, __selector, __offset)
 #endif
 
-static char system_stack[512] __attribute__((aligned(8)));
-//static char user_stack[512] __attribute__((aligned(8)));
-
 static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, void * offset, uint8_t access)
 {
 #if MODE_REAL
@@ -718,63 +716,6 @@ void interrupt_handler(registers_t * registers)
 	screen_attribute = old_screen_attribute;
 
 	screen_video_move_cursor();
-}
-
-static inline void enter_usermode(void)
-{
-#if MODE_PROTECTED && __ia16__
-	asm volatile("\
-	movw	%%sp, %%ax\n\
-	pushw	%0\n\
-	pushw	%%ax\n\
-	pushfw\n\
-	popw	%%ax\n\
-	orw	$0x3000, %%ax # set IOPL to 3 to allow I/O\n\
-	pushw	%%ax\n\
-	pushw	%1\n\
-	pushw	$1f\n\
-	iretw\n\
-1:\n\
-	movw	%%ss, %%ax\n\
-	movw	%%ax, %%ds\n\
-	movw	%%ax, %%es\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
-#elif MODE_PROTECTED && __i386__
-	asm volatile("\
-	movl	%%esp, %%eax\n\
-	pushl	%0\n\
-	pushl	%%eax\n\
-	pushfl\n\
-	popl	%%eax\n\
-	orw	$0x3000, %%ax # set IOPL to 3 to allow I/O\n\
-	pushl	%%eax\n\
-	pushl	%1\n\
-	pushl	$1f\n\
-	iretl\n\
-1:\n\
-	movl	%%ss, %%eax\n\
-	movl	%%eax, %%ds\n\
-	movl	%%eax, %%es\n\
-	movl	%%eax, %%fs\n\
-	movl	%%eax, %%gs\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
-#elif __amd64__
-	asm volatile("\
-	movq	%%rsp, %%rax\n\
-	pushq	%0\n\
-	pushq	%%rax\n\
-	pushfq\n\
-	popq	%%rax\n\
-	orw	$0x3000, %%ax # set IOPL to 3 to allow I/O\n\
-	pushq	%%rax\n\
-	pushq	%1\n\
-	pushq	$1f\n\
-	iretq\n\
-1:\n\
-	movl	%%ss, %%eax\n\
-	movl	%%eax, %%ds\n\
-	movl	%%eax, %%es\n\
-	movl	%%eax, %%fs\n\
-	movl	%%eax, %%gs\n" : : "g"(SEL_USER_SS|3), "g"(SEL_USER_CS|3));
-#endif
 }
 
 static volatile uint32_t timer_tick;
@@ -1138,10 +1079,7 @@ static inline void setup_tables(void)
 	load_idt(idt, sizeof idt);
 #endif
 
-#if MODE_REAL
-	(void) system_stack; // suppress warning
-
-#else
+#if !MODE_REAL
 	//memset(&tss, 0, sizeof tss);
 
 #if __ia16__
