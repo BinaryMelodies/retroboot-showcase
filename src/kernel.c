@@ -64,6 +64,12 @@
 # define SYSNAME "Apple Macintosh"
 #endif
 
+noreturn void kmain(void);
+extern char image_start;
+
+static char system_stack[512] __attribute__((aligned(8)));
+//static char user_stack[512] __attribute__((aligned(8)));
+
 #if USE_VGA_EMULATION
 # ifndef SCREEN_WIDTH_MAX
 #  define SCREEN_WIDTH_MAX SCREEN_WIDTH
@@ -231,15 +237,75 @@ static inline void screen_putdec(ssize_t value)
 	screen_putstr(&buffer[ptr]);
 }
 
+static volatile bool keyboard_shift = false;
+
+#define KEYBOARD_BUFFER_SIZE 16
+static volatile char keyboard_buffer[KEYBOARD_BUFFER_SIZE];
+static volatile size_t keyboard_buffer_count;
+static volatile size_t keyboard_buffer_pointer;
+static volatile bool keyboard_used = false;
+
+static inline void keyboard_buffer_push(char c)
+{
+	while(keyboard_used)
+		;
+	keyboard_used = true;
+	if(keyboard_buffer_count < KEYBOARD_BUFFER_SIZE)
+	{
+#if !MACHINE_ATARI
+		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) % KEYBOARD_BUFFER_SIZE] = c;
+#else
+		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) & (KEYBOARD_BUFFER_SIZE - 1)] = c;
+#endif
+	}
+	keyboard_used = false;
+}
+
+static inline bool keyboard_buffer_empty(void)
+{
+	return keyboard_buffer_count == 0;
+}
+
+static inline int keyboard_buffer_remove(void)
+{
+	if(keyboard_buffer_empty())
+	{
+		return -1;
+	}
+	else
+	{
+		while(keyboard_used)
+			;
+		keyboard_used = true;
+		int c = keyboard_buffer[keyboard_buffer_pointer];
+#if !MACHINE_ATARI
+		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) % KEYBOARD_BUFFER_SIZE;
+#else
+		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) & (KEYBOARD_BUFFER_SIZE - 1);
+#endif
+		keyboard_buffer_count --;
+		keyboard_used = false;
+		return c;
+	}
+}
+
+static inline bool keyboard_kbhit(void)
+{
+	return !keyboard_buffer_empty();
+}
+
+static inline int keyboard_getch(void)
+{
+	while(keyboard_buffer_empty())
+		;
+	return keyboard_buffer_remove();
+}
+
 #if __ia16__ || __i386__ || __amd64__
 #include "x86.c"
 #elif __m68k__
 #include "m68k.c"
 #endif
-
-noreturn void kmain(void);
-
-extern char image_start;
 
 static inline void test_long_line(void)
 {
@@ -290,12 +356,13 @@ static inline void test_interrupts(void)
 #endif
 }
 
-static char system_stack[512] __attribute__((aligned(8)));
-//static char user_stack[512] __attribute__((aligned(8)));
-
 noreturn void kmain(void)
 {
 	uint16_t intval = disable_interrupts();
+
+#if __ia16__ && MODE_REAL
+	(void) system_stack; // suppress warning
+#endif
 
 #if !MACHINE_AMIGA && !MACHINE_X68000 && !MACHINE_MACINTOSH // TODO
 	setup_tables();

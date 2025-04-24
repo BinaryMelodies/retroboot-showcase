@@ -387,8 +387,6 @@ DEFINE_ISR_NO_ERROR_CODE(0xFD)
 DEFINE_ISR_NO_ERROR_CODE(0xFE)
 DEFINE_ISR_NO_ERROR_CODE(0xFF)
 
-/*extern*/ static char system_stack[512];
-
 #if MODE_REAL
 asm(
 	".global\tisr_common\n\t"

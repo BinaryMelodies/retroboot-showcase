@@ -126,58 +126,6 @@ static const struct
 #endif
 };
 
-static volatile bool keyboard_shift = false;
-
-#define KEYBOARD_BUFFER_SIZE 16
-static volatile char keyboard_buffer[KEYBOARD_BUFFER_SIZE];
-static volatile size_t keyboard_buffer_count;
-static volatile size_t keyboard_buffer_pointer;
-static volatile bool keyboard_used = false;
-
-static inline void keyboard_buffer_push(char c)
-{
-	while(keyboard_used)
-		;
-	keyboard_used = true;
-	if(keyboard_buffer_count < KEYBOARD_BUFFER_SIZE)
-	{
-#if !MACHINE_ATARI
-		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) % KEYBOARD_BUFFER_SIZE] = c;
-#else
-		keyboard_buffer[(keyboard_buffer_pointer + keyboard_buffer_count++) & (KEYBOARD_BUFFER_SIZE - 1)] = c;
-#endif
-	}
-	keyboard_used = false;
-}
-
-static inline bool keyboard_buffer_empty(void)
-{
-	return keyboard_buffer_count == 0;
-}
-
-static inline int keyboard_buffer_remove(void)
-{
-	if(keyboard_buffer_empty())
-	{
-		return -1;
-	}
-	else
-	{
-		while(keyboard_used)
-			;
-		keyboard_used = true;
-		int c = keyboard_buffer[keyboard_buffer_pointer];
-#if !MACHINE_ATARI
-		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) % KEYBOARD_BUFFER_SIZE;
-#else
-		keyboard_buffer_pointer = (keyboard_buffer_pointer + 1) & (KEYBOARD_BUFFER_SIZE - 1);
-#endif
-		keyboard_buffer_count --;
-		keyboard_used = false;
-		return c;
-	}
-}
-
 #if MACHINE_IBMPC
 # define PS2_SCANCODE_LSHIFT 0x2A
 # define PS2_SCANCODE_RSHIFT 0x36
@@ -232,17 +180,5 @@ static inline void keyboard_interrupt_process(uint8_t scancode)
 	(void) scancode;
 	// TODO
 #endif
-}
-
-static inline bool keyboard_kbhit(void)
-{
-	return !keyboard_buffer_empty();
-}
-
-static inline int keyboard_getch(void)
-{
-	while(keyboard_buffer_empty())
-		;
-	return keyboard_buffer_remove();
 }
 
