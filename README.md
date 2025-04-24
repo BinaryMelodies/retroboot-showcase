@@ -13,6 +13,7 @@ The current code base supports the following systems:
     * Supports running in 16-bit [real mode](https://en.wikipedia.org/wiki/Real_mode), 16-bit [protected mode](https://en.wikipedia.org/wiki/Protected_mode), 32-bit protected mode and (for IBM PC) 64-bit [long mode](https://en.wikipedia.org/wiki/Long_mode).
     * [IBM PC](https://en.wikipedia.org/wiki/IBM_Personal_Computer) with either [MDA](https://en.wikipedia.org/wiki/IBM_Monochrome_Display_Adapter) (monochrome) or [CGA](https://en.wikipedia.org/wiki/Color_Graphics_Adapter) (color) display (or compatible)
     * [NEC PC-98](https://en.wikipedia.org/wiki/PC-98)
+    * [NEC PC-88 VA](https://en.wikipedia.org/wiki/PC-8800_series)
 * [Motorola 68000](https://en.wikipedia.org/wiki/Motorola_68000) based systems
     * [Atari ST](https://en.wikipedia.org/wiki/Atari_ST)
     * [Apple Macintosh 128K](https://en.wikipedia.org/wiki/Macintosh_128K), [Macintosh Plus](https://en.wikipedia.org/wiki/Macintosh_Plus), [Macintosh II](https://en.wikipedia.org/wiki/Macintosh_II)
@@ -46,7 +47,7 @@ static const uint8_t font8x8[256 * 8] = {
 The script `run` is provided for easy execution of the emulators.
 The following options are provided (check `run` for most up to date information):
 
-* x86 16-bit real mode: `run 16` (requires [QEMU](https://www.qemu.org/)), `run mda 16`, `run cga 16`, `run pc98 16` (requires [DOSBox-X](https://dosbox-x.com/))
+* x86 16-bit real mode: `run 16` (requires [QEMU](https://www.qemu.org/)), `run mda 16`, `run cga 16`, `run pc98 16` (requires [DOSBox-X](https://dosbox-x.com/)), `run pc88va` (requires [88VA Eternal Grafx](http://www.pc88.gr.jp/vaeg/), to be placed under `external`, also requires conversion from raw disk image to [.D88 file format](https://www.pc98.org/project/doc/d88.html))
 * x86 16-bit protected mode: `run pm` (requires [QEMU](https://www.qemu.org/)), `run mda pm`, `run cga pm`, `run pc98 pm` (requires [DOSBox-X](https://dosbox-x.com/))
 * x86 32-bit protected mode: `run 32` (requires [QEMU](https://www.qemu.org/)), `run mda 32`, `run cga 32`, `run pc98 32` (requires [DOSBox-X](https://dosbox-x.com/))
 * x86 64-bit long mode: `run 64` (requires [QEMU](https://www.qemu.org/))
