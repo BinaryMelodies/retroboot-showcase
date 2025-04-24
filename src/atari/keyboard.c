@@ -10,3 +10,27 @@ typedef struct acia_t
 #include "../pc86/scancode.c"
 #include "../pc86/keyproc.c"
 
+#define IRQ_KEYBOARD 0x46
+
+typedef struct registers_t registers_t;
+static inline void keyboard_interrupt_handler(registers_t * registers)
+{
+	(void) registers;
+
+	do
+	{
+		if((acia.control & ACIA_IRQ) != 0)
+		{
+			uint8_t scancode = acia.data;
+
+			screen_x = SCREEN_WIDTH - 2;
+			screen_y = 1;
+			screen_attribute = SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLUE;
+			screen_puthex(scancode);
+
+			keyboard_interrupt_process(scancode);
+		}
+	} while(!(MFP_BASE[1] & 0x10));
+	MFP_BASE[0x11] = 0xBF;
+}
+

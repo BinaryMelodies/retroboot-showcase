@@ -300,8 +300,6 @@ static inline void set_interrupt(uint8_t interrupt_number, void * offset)
 	*(void **)(interrupt_number * 4) = offset;
 }
 
-static inline void keyboard_interrupt_handler(registers_t * registers);
-
 void interrupt_handler(registers_t * registers)
 {
 	uint8_t old_screen_x = screen_x;
@@ -325,8 +323,8 @@ void interrupt_handler(registers_t * registers)
 		timer_interrupt_handler(registers);
 		break;
 #endif
-#if MACHINE_ATARI
-	case 0x46: // keyboard interrupt
+#ifdef IRQ_KEYBOARD
+	case IRQ_KEYBOARD:
 		keyboard_interrupt_handler(registers);
 		break;
 #endif
@@ -337,29 +335,6 @@ void interrupt_handler(registers_t * registers)
 	screen_attribute = old_screen_attribute;
 
 	screen_video_move_cursor();
-}
-
-static inline void keyboard_interrupt_handler(registers_t * registers)
-{
-	(void) registers;
-
-#if MACHINE_ATARI // TODO: other platforms
-	do
-	{
-		if((acia.control & ACIA_IRQ) != 0)
-		{
-			uint8_t scancode = acia.data;
-
-			screen_x = SCREEN_WIDTH - 2;
-			screen_y = 1;
-			screen_attribute = SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLUE;
-			screen_puthex(scancode);
-
-			keyboard_interrupt_process(scancode);
-		}
-	} while(!(MFP_BASE[1] & 0x10));
-	MFP_BASE[0x11] = 0xBF;
-#endif
 }
 
 static inline void setup_tables(void)

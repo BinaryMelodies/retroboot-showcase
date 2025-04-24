@@ -657,7 +657,6 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 }
 
 static inline void timer_interrupt_handler(registers_t * registers);
-static inline void keyboard_interrupt_handler(registers_t * registers);
 
 void interrupt_handler(registers_t * registers)
 {
@@ -705,8 +704,8 @@ void interrupt_handler(registers_t * registers)
 		timer_interrupt_handler(registers);
 		break;
 #endif
-#if MACHINE_IBMPC || MACHINE_NECPC98
-	case IRQ0 + 1: // keyboard interrupt
+#ifdef IRQ_KEYBOARD
+	case IRQ_KEYBOARD:
 		keyboard_interrupt_handler(registers);
 		break;
 #endif
@@ -740,36 +739,13 @@ static inline void timer_interrupt_handler(registers_t * registers)
 	screen_putchar("/-\\|"[timer_tick & 3]);
 }
 
-static inline void keyboard_interrupt_handler(registers_t * registers)
-{
-	(void) registers;
-
-	uint8_t scancode;
-#if MACHINE_IBMPC || MACHINE_NECPC98
-	scancode = inp(PORT_PS2_DATA);
-#endif
-
-	screen_x = SCREEN_WIDTH - 2;
-	screen_y = 1;
-#if MACHINE_IBMPC
-	screen_attribute =
-		screen_mode == SCREEN_MODE_MDA
-			? SCREEN_ATTR_MDA_NORMAL | SCREEN_ATTR_FG_LIGHT
-			: SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLUE;
-#elif MACHINE_NECPC98
-	screen_attribute = SCREEN_ATTR_BLUE | SCREEN_ATTR_INVERTED;
-#endif
-	screen_puthex(scancode);
-
-	keyboard_interrupt_process(scancode);
-}
-
 static inline void setup_tables(void)
 {
 #if MODE_PROTECTED && __ia16__
 	descriptor_set_segment(&gdt[SEL_KERNEL_CS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_CODE | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 	descriptor_set_segment(&gdt[SEL_KERNEL_SS / 8], 0, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL0, DESCRIPTOR_FLAGS_16BIT);
 # if MACHINE_IBMPC
+//	if(screen_mode != SCREEN_MODE_MDA) // screen mode has not been initialized yet
 	if(*(char *)0x0449 != 0x07)
 		descriptor_set_segment(&gdt[SEL_KERNEL_SCREEN / 8], 0x0B8000, 0xFFFF, DESCRIPTOR_ACCESS_DATA | DESCRIPTOR_ACCESS_CPL3, DESCRIPTOR_FLAGS_16BIT);
 	else
