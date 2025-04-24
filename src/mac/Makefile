@@ -18,5 +18,7 @@ BOOT=src/mac/boot.s
 FIXIMAGE=./ignore
 #NEEDFAT=0
 
+INCLUDES=src/mac/video.h src/m68k.c src/keyboard.c src/i86.h src/system.h
+
 include src/Makefile.template
 

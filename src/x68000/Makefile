@@ -17,5 +17,7 @@ LDSCRIPT=src/x68000/linker.ld
 BOOT=src/x68000/boot.s
 FIXIMAGE=./ignore
 
+INCLUDES=src/x68000/video.h src/m68k.c src/keyboard.c src/i86.h src/system.h
+
 include src/Makefile.template
 

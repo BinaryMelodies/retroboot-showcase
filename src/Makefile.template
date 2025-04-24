@@ -3,13 +3,9 @@ obj/$(PLATFORM)/boot.o: $(BOOT)
 	mkdir -p `dirname $@`
 	$(AS) $^ -o $@ $(ASFLAGS)
 
-obj/$(PLATFORM)/%.o: src/%.s
+obj/$(PLATFORM)/kernel.o: src/kernel.c $(INCLUDES)
 	mkdir -p `dirname $@`
-	$(AS) $^ -o $@ $(ASFLAGS)
-
-obj/$(PLATFORM)/%.o: src/%.c
-	mkdir -p `dirname $@`
-	$(CC) -c $^ -o $@ $(CFLAGS)
+	$(CC) -c src/kernel.c -o $@ $(CFLAGS)
 
 obj/$(PLATFORM)/kernel.elf: obj/$(PLATFORM)/boot.o obj/$(PLATFORM)/kernel.o
 	mkdir -p `dirname $@`
