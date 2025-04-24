@@ -44,6 +44,9 @@ then
 	else
 		dosbox-x --set machine=pc98 -c "boot bin/pc98/disk.img"
 	fi
+elif [ "$1" == "pc88va" ]
+then
+	external/vaeg bin/pc88va/disk.img
 elif [ "$1" == "atari" -o "$1" == "st" ]
 then
 	hatari bin/atari/disk.st

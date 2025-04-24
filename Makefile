@@ -1,5 +1,5 @@
 
-all: bin/pc86/disk.img bin/pc286/disk.img bin/pc386/disk.img bin/pc64/disk.img bin/pc98/disk.img bin/pc98_286/disk.img bin/pc98_386/disk.img bin/atari/disk.st bin/x68000/disk.xdf bin/amiga/disk.adf bin/mac/disk.400
+all: bin/pc86/disk.img bin/pc286/disk.img bin/pc386/disk.img bin/pc64/disk.img bin/pc98/disk.img bin/pc98_286/disk.img bin/pc98_386/disk.img bin/pc88va/disk.img bin/atari/disk.st bin/x68000/disk.xdf bin/amiga/disk.adf bin/mac/disk.400
 
 bin/%/disk.img: src/%/Makefile FORCE
 	make -f $< $@

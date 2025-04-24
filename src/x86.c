@@ -7,10 +7,12 @@ enum
 	IRQ8 = IRQ0 + 8,
 };
 
+#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
 #include "i8259.c"
 #include "i8253.c"
 #include "keyboard.c"
 #include "timer.c"
+#endif
 
 #if !MODE_REAL
 enum
@@ -661,6 +663,7 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 
 void interrupt_handler(registers_t * registers)
 {
+#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
 	if(IRQ8 <= registers->FLD_INTERRUPT_NUMBER && registers->FLD_INTERRUPT_NUMBER < IRQ8 + 8)
 	{
 		outp(PORT_PIC2_COMMAND, PIC_EOI);
@@ -670,6 +673,7 @@ void interrupt_handler(registers_t * registers)
 	{
 		outp(PORT_PIC1_COMMAND, PIC_EOI);
 	}
+#endif
 
 	uint8_t old_screen_x = screen_x;
 	uint8_t old_screen_y = screen_y;
@@ -684,6 +688,8 @@ void interrupt_handler(registers_t * registers)
 			: SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_RED;
 #elif MACHINE_NECPC98
 	screen_attribute = SCREEN_ATTR_RED;
+#elif MACHINE_NECPC88VA
+	screen_attribute = SCREEN_ATTR_RED | SCREEN_ATTR_INVERTED;
 #endif
 
 	screen_putstr("Interrupt 0x");
@@ -700,7 +706,7 @@ void interrupt_handler(registers_t * registers)
 
 	switch(registers->FLD_INTERRUPT_NUMBER)
 	{
-#if MACHINE_IBMPC || MACHINE_NECPC98
+#if IRQ_TIMER
 	case IRQ_TIMER: // timer interrupt
 		timer_interrupt_handler(registers);
 		break;
@@ -1060,7 +1066,9 @@ static inline void setup_tables(void)
 	load_tss(SEL_TSS);
 #endif // MODE_REAL
 
+#if MACHINE_IBMPC || MACHINE_NECPC98 // TODO
 	i8259_setup(IRQ0, IRQ8);
 	i8253_setup(20);
+#endif
 }
 

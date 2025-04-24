@@ -54,6 +54,8 @@
 # define SYSNAME "IBM PC"
 #elif MACHINE_NECPC98
 # define SYSNAME "NEC PC-98"
+#elif MACHINE_NECPC88VA
+# define SYSNAME "NEC PC-88 VA"
 #elif MACHINE_ATARI
 # define SYSNAME "Atari ST"
 #elif MACHINE_X68000
@@ -256,7 +258,7 @@ static inline void test_scroll(void)
 	for(int i = 2; i < SCREEN_HEIGHT; i++)
 		screen_putstr("scroll\n");
 
-#if USE_VGA_EMULATION || MACHINE_IBMPC || MACHINE_NECPC98
+#if USE_VGA_EMULATION || MACHINE_IBMPC || MACHINE_NECPC98 || MACHINE_NECPC88VA
 	screen_y = 2;
 #endif
 }

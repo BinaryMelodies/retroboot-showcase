@@ -41,6 +41,12 @@
 	.equ	MACHINE_NECPC98, 0
 .endif
 
+.ifdef	MACHINE_NECPC88VA
+	.equ	MACHINE_NECPC88VA, 1
+.else
+	.equ	MACHINE_NECPC88VA, 0
+.endif
+
 .macro	_descriptor	base, limit, attribute
 	# Segment descriptors use an unusual layout
 	.word	(\limit) & 0xFFFF
@@ -76,18 +82,20 @@
 	.global	_start
 	.code16
 
-	# Start at address 0x7C00
+	# IBM PC: Start address at 0x07C00
+	# NEC PC-98: Start address at 0x1FE00 or 0x1FC00
+	# NEC PC-88 VA: Start address at 0xC0000
 _start:
-	# skip over BIOS parameter block
+	# Skip over BIOS parameter block
 	jmp	1f
 
 	.rept	0x3e - 2
-	# skip over BIOS parameter block
+	# Skip over BIOS parameter block
 	.byte	0
 	.endr
 
 1:
-	# Set up stack at 0x1000
+	# Set up temporary stack at 0x1000
 	xorw	%ax, %ax
 	movw	%ax, %ss
 	movw	$0x1000, %sp
@@ -101,8 +109,7 @@ _start:
 	movw	%ax, %es
 .endif
 
-.if MACHINE_NECPC98
-	# Move boot sector from 0x7C00 (IBM PC) or 0x1FE0:0 (or 0x1FC0:0) (NEC PC-98) to 0:0x5000
+.if MACHINE_NECPC98 || MACHINE_NECPC88VA
 	movw	%cs, %ax
 	movw	%ax, %ds
 	xorw	%si, %si
@@ -173,7 +180,7 @@ _start:
 
 read_sectors:
 .if MACHINE_IBMPC
-	# ES:BX contains the destination buffer, 0:0x7E00
+	# ES:BX contains the destination buffer, 0:0x5200
 	movw	$_start + 0x200, %bx
 	# AH contains the BIOS function number 0x02, AL contains the sector count
 	movw	$0x0200 + (sector_count - 1), %ax
@@ -200,10 +207,10 @@ read_sectors:
 .complete:
 .endif
 .if MACHINE_NECPC98
-	# ES:BP contains the destination buffer, 0:0x7E00
+	# ES:BP contains the destination buffer, 0:0x5200 or 0:0x5400
 	movw	$_start + 0x200, %bp
 	# BX contains the read size
-	movw	$image_size, %bx
+	movw	$image_size - 512, %bx
 	# Access is according to cylinder:head:sector
 	# DH contains the head number, DL the 1 based sector number
 	# First sector is already in memory, so we start from 2
@@ -213,6 +220,19 @@ read_sectors:
 	# AH contains the BIOS function number 0x06, AL contains the device type, 0x30
 	movw	$0x0630, %ax
 	int	$0x1B
+.endif
+.if MACHINE_NECPC88VA
+	# ES:BP contains the destination buffer, 0:0x5400
+	movw	$_start + 0x400, %bp
+	# AL contains the sector count, AH contains the BIOS function number 0x01
+	movw	$0x0100 + sector_count - 1, %ax
+	# Access is according to cylinder:head:sector
+	# DH contains the 1 based sector number number, DL the sector size (0: 128, 1: 256, 2: 512, 3: 1024)
+	# First sector is already in memory, so we start from 2
+	movw	$0x0203, %dx
+	# CH contains the drive number, CL the track number (cylinder * 2 + head)
+	movw	$0x0000, %cx
+	int	$0x80
 .endif
 
 .if !MODE_REAL
