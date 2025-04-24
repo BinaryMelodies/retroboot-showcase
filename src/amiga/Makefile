@@ -18,7 +18,7 @@ BOOT=src/amiga/boot.s
 FIXIMAGE=python3 makeboot.py -amiga
 #NEEDFAT=0
 
-INCLUDES=src/amiga/video.h src/m68k.c src/keyboard.c src/i86.h src/system.h
+INCLUDES=src/amiga/video.h src/m68k.c src/system.h
 
 include src/Makefile.template
 

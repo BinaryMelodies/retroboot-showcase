@@ -18,7 +18,7 @@ BOOT=src/atari/boot.s
 FIXIMAGE=python3 makeboot.py -atari
 NEEDFAT=1
 
-INCLUDES=src/atari/video.h src/m68k.c src/keyboard.c src/i86.h src/system.h
+INCLUDES=src/atari/video.h src/m68k.c src/system.h src/pc86/scancode.c src/atari/keyboard.c src/pc86/keyproc.c
 
 include src/Makefile.template
 

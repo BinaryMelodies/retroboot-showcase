@@ -1,5 +1,7 @@
 
+#if !MACHINE_AMIGA && !MACHINE_MACINTOSH && !MACHINE_X68000 // TODO
 #include "keyboard.c"
+#endif
 
 # define DEFINE_ISR(__hex) \
 void isr##__hex(void); \
