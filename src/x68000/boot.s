@@ -28,9 +28,9 @@ _start:
 	# high byte: 128 times power of 2 (only 1024 byte sectors supported)
 	move.l	#0x03000002, %d2
 	# count
-	move.l	#image_size - 1024, %d3
+	move.l	#image_size - BOOT_BLOCK_SIZE, %d3
 	# buffer
-	lea	_start + 1024(%pc), %a1
+	lea	_start + BOOT_BLOCK_SIZE(%pc), %a1
 	# PDA (boot unit number) & mode
 	move.w	#0x70, %d1
 	or.w	%d7, %d1

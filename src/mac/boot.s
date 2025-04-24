@@ -28,10 +28,10 @@ _start:
 	addq.l	#4, %a0
 1:
 	.equ	ioBuffer, 0x20
-	movel	#start + 1024, %a1
+	movel	#start + BOOT_BLOCK_SIZE, %a1
 	movel	%a1, ioBuffer(%a0)
 	.equ	ioReqCount, 0x24
-	movel	#image_size - 1024, ioReqCount(%a0)
+	movel	#image_size - BOOT_BLOCK_SIZE, ioReqCount(%a0)
 	.equ	ioPosOffset, 0x2E
 	# Must be a multiple of 512
 	movel	#1024, ioPosOffset(%a0)

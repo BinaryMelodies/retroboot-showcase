@@ -13,7 +13,7 @@ ASFLAGS=--defsym MODE_REAL=1 --defsym BITS16=1 --defsym MACHINE_NECPC88VA=1 --de
 CFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -fno-delete-null-pointer-checks
 #CFLAGS+= -O2
 CFLAGS+= -Isrc/pc88va -DMODE_REAL=1 -DMACHINE_NECPC88VA=1
-LDFLAGS=-ffreestanding -O2 -nostdlib -lgcc -Wl,--defsym=SECTOR_SIZE=$(SECTOR_SIZE) -Wl,--defsym=SECTOR_SIZE_SHIFT=$(SECTOR_SIZE_SHIFT)
+LDFLAGS=-ffreestanding -O2 -nostdlib -lgcc -Wl,--defsym=SECTOR_SIZE=$(SECTOR_SIZE) -Wl,--defsym=SECTOR_SIZE_SHIFT=$(SECTOR_SIZE_SHIFT) -Wl,--defsym=BOOT_BLOCK_SIZE=$(BOOT_BLOCK_SIZE)
 
 DISKSIZE=1232
 FORMATFLAGS=-h 2 -t 77 -s 8

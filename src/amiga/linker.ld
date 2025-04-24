@@ -10,7 +10,7 @@ SECTIONS
 	.text :
 	{
 		*(boot)
-		. = ALIGN(1024);
+		. = ALIGN(BOOT_BLOCK_SIZE);
 		*(.text)
 		. = ALIGN(4);
 	}
@@ -22,7 +22,7 @@ SECTIONS
 	.data :
 	{
 		*(.data)
-		. = ALIGN(512);
+		. = ALIGN(SECTOR_SIZE);
 	}
 	image_end = .;
 	image_size = image_end - image_start;

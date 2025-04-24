@@ -5,11 +5,15 @@ DISKFILE=disk.st
 AS=m68k-elf-as
 CC=m68k-elf-gcc
 
-ASFLAGS=-m68000 --defsym MACHINE_ATARI=1
+SECTOR_SIZE=512
+SECTOR_SIZE_SHIFT=9
+BOOT_BLOCK_SIZE=512
+
+ASFLAGS=-m68000 --defsym MACHINE_ATARI=1 --defsym SECTOR_SIZE=$(SECTOR_SIZE) --defsym SECTOR_SIZE_SHIFT=$(SECTOR_SIZE_SHIFT) --defsym BOOT_BLOCK_SIZE=$(BOOT_BLOCK_SIZE)
 CFLAGS=-std=gnu99 -ffreestanding -Wall -Wextra -m68000 -mpcrel
 CFLAGS+= -O2
 CFLAGS+= -Isrc/atari -DMACHINE_ATARI=1 -DUSE_VGA_EMULATION=1
-LDFLAGS=-ffreestanding -O2 -nostdlib -m68000 -mpcrel -lgcc
+LDFLAGS=-ffreestanding -O2 -nostdlib -m68000 -mpcrel -lgcc -Wl,--defsym=SECTOR_SIZE=$(SECTOR_SIZE) -Wl,--defsym=SECTOR_SIZE_SHIFT=$(SECTOR_SIZE_SHIFT) -Wl,--defsym=BOOT_BLOCK_SIZE=$(BOOT_BLOCK_SIZE)
 
 DISKSIZE=1440
 FORMATFLAGS=-f 1440 -a

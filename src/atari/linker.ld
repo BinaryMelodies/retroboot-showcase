@@ -5,7 +5,7 @@ SECTIONS
 	.text :
 	{
 		*(boot)
-		. = ALIGN(512);
+		. = ALIGN(BOOT_BLOCK_SIZE);
 		*(.text)
 		. = ALIGN(4);
 	}
@@ -17,11 +17,11 @@ SECTIONS
 	.data :
 	{
 		*(.data)
-		. = ALIGN(512);
+		. = ALIGN(SECTOR_SIZE);
 	}
 	image_end = .;
 	image_size = image_end - image_start;
-	sector_count = (image_end - image_start) >> 9;
+	sector_count = (image_end - image_start) >> SECTOR_SIZE_SHIFT;
 	.bss :
 	{
 		bss_start = .;

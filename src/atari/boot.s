@@ -26,7 +26,7 @@ _start:
 	addq.l	#4, %sp
 
 	# allocate memory for image, ignoring sector 1
-	move.l	#memory_size - 512, -(%sp)
+	move.l	#memory_size - BOOT_BLOCK_SIZE, -(%sp)
 	move.w	#0x48, -(%sp)
 	trap	#1
 	addq.l	#6, %sp
@@ -38,7 +38,7 @@ _start:
 
 	# set up stack
 	move.l	%d0, %a0
-	add.l	#stack_top - 512, %a0
+	add.l	#stack_top - BOOT_BLOCK_SIZE, %a0
 	move.l	%a0, %sp
 
 	# store buffer address in memory
@@ -61,7 +61,7 @@ _start:
 	lea	14(%sp), %sp
 
 	# jump to same location in memory buffer
-	add.l	#2f - 512, (%sp)
+	add.l	#2f - BOOT_BLOCK_SIZE, (%sp)
 	rts
 
 	.section	.text

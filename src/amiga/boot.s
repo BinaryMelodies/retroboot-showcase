@@ -4,7 +4,6 @@
 	.section	boot, "ax", @progbits
 	.global _start
 
-	.equ	BLOCK_SIZE, 1024
 	.equ	CMD_READ, 2
 	.equ	io_Command, 32
 	.equ	io_Length, 36
@@ -24,14 +23,14 @@ _start:
 # A1: IoStdReq
 
 	# first two 512 byte sectors are already loaded
-	move.l	#image_start + BLOCK_SIZE, %a2
+	move.l	#image_start + BOOT_BLOCK_SIZE, %a2
 	move.l	#CMD_READ, io_Command(%a1)
 	# must be a multiple of 512
-	move.l	#image_size - BLOCK_SIZE, io_Length(%a1)
+	move.l	#image_size - BOOT_BLOCK_SIZE, io_Length(%a1)
 	# must be word aligned
 	move.l	%a2, io_Data(%a1)
 	# must be a multiple of 512
-	move.l	#BLOCK_SIZE, io_Offset(%a1)
+	move.l	#BOOT_BLOCK_SIZE, io_Offset(%a1)
 	jsr	DoIO(%a6)
 
 	tst.l	%d0

@@ -5,7 +5,7 @@ SECTIONS
 	.text :
 	{
 		*(boot)
-		. = ALIGN(SECTOR_SIZE);
+		. = ALIGN(BOOT_BLOCK_SIZE);
 		*(.text)
 	}
 	.rodata :
