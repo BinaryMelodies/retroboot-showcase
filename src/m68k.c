@@ -1,4 +1,6 @@
 
+typedef struct registers_t registers_t;
+
 #if !MACHINE_AMIGA && !MACHINE_MACINTOSH && !MACHINE_X68000 // TODO
 #include "keyboard.c"
 #endif

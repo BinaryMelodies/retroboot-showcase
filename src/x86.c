@@ -1,7 +1,16 @@
 
+typedef struct registers_t registers_t;
+
+enum
+{
+	IRQ0 = 32,
+	IRQ8 = IRQ0 + 8,
+};
+
 #include "i8259.c"
 #include "i8253.c"
 #include "keyboard.c"
+#include "timer.c"
 
 #if !MODE_REAL
 enum
@@ -54,12 +63,6 @@ descriptor64_t idt[256];
 #endif
 
 #endif
-
-enum
-{
-	IRQ0 = 32,
-	IRQ8 = IRQ0 + 8,
-};
 
 #if MODE_REAL
 # define DEFINE_ISR_NO_ERROR_CODE(__hex) \
@@ -656,8 +659,6 @@ static inline void set_interrupt(uint8_t interrupt_number, uint16_t selector, vo
 #endif
 }
 
-static inline void timer_interrupt_handler(registers_t * registers);
-
 void interrupt_handler(registers_t * registers)
 {
 	if(IRQ8 <= registers->FLD_INTERRUPT_NUMBER && registers->FLD_INTERRUPT_NUMBER < IRQ8 + 8)
@@ -700,7 +701,7 @@ void interrupt_handler(registers_t * registers)
 	switch(registers->FLD_INTERRUPT_NUMBER)
 	{
 #if MACHINE_IBMPC || MACHINE_NECPC98
-	case IRQ0 + 0: // timer interrupt
+	case IRQ_TIMER: // timer interrupt
 		timer_interrupt_handler(registers);
 		break;
 #endif
@@ -716,27 +717,6 @@ void interrupt_handler(registers_t * registers)
 	screen_attribute = old_screen_attribute;
 
 	screen_video_move_cursor();
-}
-
-static volatile uint32_t timer_tick;
-
-static inline void timer_interrupt_handler(registers_t * registers)
-{
-	(void) registers;
-
-	timer_tick ++;
-
-	screen_x = SCREEN_WIDTH - 1;
-	screen_y = 0;
-#if MACHINE_IBMPC
-	screen_attribute =
-		screen_mode == SCREEN_MODE_MDA
-			? SCREEN_ATTR_MDA_NORMAL | SCREEN_ATTR_FG_LIGHT
-			: SCREEN_ATTR_CGA_FG_WHITE | SCREEN_ATTR_CGA_BG_BLACK;
-#elif MACHINE_NECPC98
-	screen_attribute = SCREEN_ATTR_WHITE;
-#endif
-	screen_putchar("/-\\|"[timer_tick & 3]);
 }
 
 static inline void setup_tables(void)

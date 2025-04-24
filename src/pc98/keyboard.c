@@ -6,7 +6,6 @@
 
 #define IRQ_KEYBOARD (IRQ0 + 1)
 
-typedef struct registers_t registers_t;
 static inline void keyboard_interrupt_handler(registers_t * registers)
 {
 	(void) registers;
