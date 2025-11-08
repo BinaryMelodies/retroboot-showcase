@@ -5,22 +5,7 @@
 
 #include "../pc86/colors.h"
 
-#define CUSTOM 0xDFF000
-#define COP1LCH (*(volatile uint16_t *)(CUSTOM + 0x080))
-#define COPJMP1 (*(volatile uint16_t *)(CUSTOM + 0x088))
-#define DIWSTRT (*(volatile uint16_t *)(CUSTOM + 0x08E))
-#define DIWSTOP (*(volatile uint16_t *)(CUSTOM + 0x090))
-#define DDFSTRT (*(volatile uint16_t *)(CUSTOM + 0x092))
-#define DDFSTOP (*(volatile uint16_t *)(CUSTOM + 0x094))
-#define DMACON (*(volatile uint16_t *)(CUSTOM + 0x096))
-#define INTENA (*(volatile uint16_t *)(CUSTOM + 0x09A))
-#define INTREQ (*(volatile uint16_t *)(CUSTOM + 0x09C))
-#define BPLCON0 (*(volatile uint16_t *)(CUSTOM + 0x100))
-#define BPLCON1 (*(volatile uint16_t *)(CUSTOM + 0x102))
-#define BPL1MOD (*(volatile uint16_t *)(CUSTOM + 0x108))
-#define BPL2MOD (*(volatile uint16_t *)(CUSTOM + 0x10A))
-#define COLOR0 (*(volatile uint16_t *)(CUSTOM + 0x180))
-#define COLOR1 (*(volatile uint16_t *)(CUSTOM + 0x182))
+#include "amiga.h"
 
 enum
 {

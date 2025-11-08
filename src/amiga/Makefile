@@ -22,7 +22,7 @@ BOOT=src/amiga/boot.s
 FIXIMAGE=python3 makeboot.py -amiga
 #NEEDFAT=0
 
-INCLUDES=src/amiga/video.h src/atari/vgasim.c src/pc86/colors.h src/m68k.c src/system.h
+INCLUDES=src/amiga/amiga.h src/amiga/video.h src/atari/vgasim.c src/pc86/colors.h src/m68k.c src/system.h src/pc86/scancode.c src/amiga/keyboard.c src/pc86/keyproc.c src/amiga/timer.c
 
 include src/Makefile.template
 

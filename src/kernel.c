@@ -269,6 +269,8 @@ static inline void test_interrupts(void)
 	asm volatile("int $3");
 	asm volatile("int $4");
 	asm volatile("int $0x80");
+#elif __m68k__
+	asm volatile("trap #1");
 #endif
 }
 
@@ -280,7 +282,7 @@ noreturn void kmain(void)
 	(void) system_stack; // suppress warning
 #endif
 
-#if !MACHINE_AMIGA && !MACHINE_MACINTOSH // TODO
+#if !MACHINE_MACINTOSH // TODO
 	setup_tables();
 #endif
 
@@ -296,7 +298,7 @@ noreturn void kmain(void)
 	test_putdec();
 #endif
 
-#if !MACHINE_AMIGA && !MACHINE_MACINTOSH // TODO
+#if !MACHINE_MACINTOSH // TODO
 	enable_interrupts(intval);
 #else
 	(void) intval;
@@ -316,12 +318,13 @@ noreturn void kmain(void)
 	else
 		screen_putstr("Running in user mode\n");
 
-//	test_interrupts();
+	test_interrupts();
 
-screen_putchar('?');
+	screen_putchar('?');
+
 	for(;;)
 	{
-#if !MACHINE_AMIGA && !MACHINE_MACINTOSH // TODO
+#if !MACHINE_MACINTOSH // TODO
 		screen_putchar(keyboard_getch());
 		if(screen_y == SCREEN_HEIGHT - 1)
 		{
