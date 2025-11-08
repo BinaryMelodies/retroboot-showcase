@@ -1,7 +1,7 @@
 
 typedef struct registers_t registers_t;
 
-#if !MACHINE_AMIGA && !MACHINE_MACINTOSH && !MACHINE_X68000 // TODO
+#if !MACHINE_AMIGA && !MACHINE_MACINTOSH // TODO
 #include "keyboard.c"
 #endif
 
@@ -341,6 +341,11 @@ void interrupt_handler(registers_t * registers)
 
 static inline void setup_tables(void)
 {
+#if MACHINE_X68000
+	// TODO: make this more general
+	set_interrupt(0x45, isr0x45);
+	set_interrupt(0x4C, isr0x4C);
+#else
 #if MACHINE_ATARI
 	acia.control = 3; // reset
 	acia.control = 0x96;
@@ -606,5 +611,6 @@ static inline void setup_tables(void)
 	set_interrupt(0xFD, isr0xFD);
 	set_interrupt(0xFE, isr0xFE);
 	set_interrupt(0xFF, isr0xFF);
+#endif // MACHINE_X68000
 }
 

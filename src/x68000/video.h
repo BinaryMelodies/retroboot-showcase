@@ -4,7 +4,8 @@
 enum
 {
 #if USE_VGA_EMULATION
-	SCREEN_WIDTH = 128,
+	//SCREEN_WIDTH = 128, // TODO: check why the actual screen width is only 96 character cells wide
+	SCREEN_WIDTH = 96,
 	SCREEN_HEIGHT = 32,
 #else
 	SCREEN_WIDTH = 80,
