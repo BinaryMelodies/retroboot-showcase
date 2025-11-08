@@ -315,11 +315,16 @@ void interrupt_handler(registers_t * registers)
 	screen_y = SCREEN_HEIGHT - 1;
 	screen_attribute = SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_RED;
 
+#if MACHINE_X68000 // TODO: these instructions break resuming the interrupt
+if(registers->interrupt_number != IRQ_TIMER)
+#endif
+{
 	screen_putstr("Interrupt 0x");
 	screen_puthex(registers->interrupt_number);
 	screen_putstr(" called from 0x");
 	screen_puthex(registers->pc);
 	screen_putchar(' ');
+}
 
 	switch(registers->interrupt_number)
 	{
@@ -344,11 +349,6 @@ void interrupt_handler(registers_t * registers)
 
 static inline void setup_tables(void)
 {
-#if MACHINE_X68000
-	// TODO: make this more general
-	set_interrupt(0x45, isr0x45); // timer
-	set_interrupt(0x4C, isr0x4C); // keyboard
-#else
 #if MACHINE_ATARI
 	acia.control = 3; // reset
 	acia.control = 0x96;
@@ -425,7 +425,9 @@ static inline void setup_tables(void)
 	set_interrupt(0x42, isr0x42);
 	set_interrupt(0x43, isr0x43);
 	set_interrupt(0x44, isr0x44);
-	set_interrupt(0x45, isr0x45);
+#if !MACHINE_X68000
+	set_interrupt(0x45, isr0x45); // timer
+#endif
 	set_interrupt(0x46, isr0x46);
 	set_interrupt(0x47, isr0x47);
 	set_interrupt(0x48, isr0x48);
@@ -440,7 +442,9 @@ static inline void setup_tables(void)
 	set_interrupt(0x51, isr0x51);
 	set_interrupt(0x52, isr0x52);
 	set_interrupt(0x53, isr0x53);
-	set_interrupt(0x54, isr0x54);
+#if !MACHINE_X68000
+	set_interrupt(0x54, isr0x54); // TODO
+#endif
 	set_interrupt(0x55, isr0x55);
 	set_interrupt(0x56, isr0x56);
 	set_interrupt(0x57, isr0x57);
@@ -612,6 +616,5 @@ static inline void setup_tables(void)
 	set_interrupt(0xFD, isr0xFD);
 	set_interrupt(0xFE, isr0xFE);
 	set_interrupt(0xFF, isr0xFF);
-#endif // MACHINE_X68000
 }
 

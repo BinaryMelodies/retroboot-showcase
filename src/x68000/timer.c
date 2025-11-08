@@ -7,8 +7,6 @@ static inline void timer_interrupt_handler(registers_t * registers)
 {
 	(void) registers;
 
-	// TODO: needs processing, otherwise we never return to the calling site
-
 	timer_tick ++;
 
 	screen_x = SCREEN_WIDTH - 1;
