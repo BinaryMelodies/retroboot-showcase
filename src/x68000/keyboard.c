@@ -1,7 +1,7 @@
 
 #define USART_DATA_REGISTER (*(uint8_t *)0xE8802F)
 
-#include "../pc86/scancode.c"
+#include "../x68000/scancode.c"
 #include "../pc86/keyproc.c"
 
 #define IRQ_KEYBOARD 0x4C

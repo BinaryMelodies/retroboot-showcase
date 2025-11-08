@@ -21,7 +21,7 @@ LDSCRIPT=src/x68000/linker.ld
 BOOT=src/x68000/boot.s
 FIXIMAGE=./ignore
 
-INCLUDES=src/x68000/video.h src/atari/vgasim.c src/pc86/colors.h src/m68k.c src/system.h src/pc86/scancode.c src/x68000/keyboard.c src/pc86/keyproc.c src/x68000/timer.c
+INCLUDES=src/x68000/video.h src/atari/vgasim.c src/pc86/colors.h src/m68k.c src/system.h src/x68000/scancode.c src/x68000/keyboard.c src/pc86/keyproc.c src/x68000/timer.c
 
 include src/Makefile.template
 
