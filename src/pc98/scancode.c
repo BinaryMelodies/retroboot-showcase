@@ -1,7 +1,10 @@
 
+// This is a mapping based on the position of the keys on a keyboard and their analoguous keys on an American IBM keyboard
+// The symbolic names are chosen according to the DOSBox-X emulator
+
 enum
 {
-	_KBD_BACKTICK,
+	_KBD_ESCAPE,
 	_KBD_1,
 	_KBD_2,
 	_KBD_3,
@@ -13,8 +16,9 @@ enum
 	_KBD_9,
 	_KBD_0,
 	_KBD_MINUS,
-	_KBD_EQUALS,
-	_KBD_BACKSPACE = 0x0E,
+	_KBD_EQUALS, // actually ^
+	_KBD_CARET, // actually ¥
+	_KBD_BACKSPACE,
 	_KBD_TAB,
 	_KBD_Q,
 	_KBD_W,
@@ -26,8 +30,8 @@ enum
 	_KBD_I,
 	_KBD_O,
 	_KBD_P,
-	_KBD_OPEN_BRACKET,
-	_KBD_CLOSE_BRACKET,
+	_KBD_OPEN_BRACKET, // actually @
+	_KBD_CLOSE_BRACKET, // actually [
 	_KBD_ENTER,
 	_KBD_A,
 	_KBD_S,
@@ -39,8 +43,8 @@ enum
 	_KBD_K,
 	_KBD_L,
 	_KBD_SEMICOLON,
-	_KBD_APOSTROPHE,
-	_KBD_BACKSLASH,
+	_KBD_APOSTROPHE, // actually :
+	_KBD_BACKSLASH, // actually ]
 	_KBD_Z,
 	_KBD_X,
 	_KBD_C,
@@ -51,10 +55,10 @@ enum
 	_KBD_COMMA,
 	_KBD_PERIOD,
 	_KBD_SLASH,
-
-	_KBD_SPACE = 0x34,
-
-	_KBD_PGDN = 0x36,
+	_KBD_UNDERSCORE, // Japanese specific
+	_KBD_SPACE,
+	_KBD_XFER, // Japanese specific
+	_KBD_PGDN,
 	_KBD_PGUP,
 	_KBD_INS,
 	_KBD_DEL,
@@ -63,7 +67,7 @@ enum
 	_KBD_RIGHT,
 	_KBD_DOWN,
 	_KBD_HOME,
-	_KBD_END,
+	_KBD_END, // actually HELP
 	_KBD_MINUS_2, // numpad
 	_KBD_SLASH_2, // numpad
 	_KBD_HOME_2, // numpad
@@ -77,14 +81,24 @@ enum
 	_KBD_END_2, // numpad
 	_KBD_DOWN_2, // numpad
 	_KBD_PGDN_2, // numpad
-
-	_KBD_INS_2 = 0x4E, // numpad
-
+	_KBD_EQUALS_2, // numpad
+	_KBD_INS_2, // numpad
+	_KBD_COMMA_2, // numpad
 	_KBD_DEL_2 = 0x50, // numpad
+	_KBD_NFER, // Japanese specific
+#if MACHINE_NECPC98
+	_KBD_F11,
+	_KBD_F12,
+	_KBD_F13,
+	_KBD_F14,
+	_KBD_F15,
 
-	_KBD_ESCAPE = 0x60,
+	_KBD_HOME_3 = 0x5E,
+#endif
 
-	_KBD_F1 = 0x62,
+	_KBD_STOP = 0x60,
+	_KBD_COPY,
+	_KBD_F1,
 	_KBD_F2,
 	_KBD_F3,
 	_KBD_F4,
@@ -97,9 +111,17 @@ enum
 
 	_KBD_SHIFT = 0x70,
 	_KBD_CAPSLOCK,
-
-	_KBD_ALT = 0x73,
+	_KBD_KANA,
+	// TODO: is this a typo, or are PC-88VA scancodes actually shifted by 1 compared to PC-98 scancodes?
+	_KBD_ALT, // actually GRPH
 	_KBD_CTRL,
+
+#if MACHINE_IBMPC88VA
+	_KBD_SHIFT_2 = 0x78,
+	_KBD_ENTER_2,
+	_KBD_PC,
+	_KBD_FULLWIDTH,
+#endif
 };
 
 static const struct
@@ -108,8 +130,8 @@ static const struct
 	char shifted;
 } keyboard_scancode_table[128] =
 {
-	[_KBD_BACKTICK] =
-		{ '`', '~' },
+	[_KBD_ESCAPE] =
+		{ '\33', '\33' },
 	[_KBD_1] =
 		{ '1', '!' },
 	[_KBD_2] =
@@ -134,6 +156,8 @@ static const struct
 		{ '-', '_' },
 	[_KBD_EQUALS] =
 		{ '=', '+' },
+	[_KBD_CARET] =
+		{ '^', '^' },
 	[_KBD_BACKSPACE] =
 		{ '\b', '\b' },
 	[_KBD_TAB] =
@@ -238,15 +262,19 @@ static const struct
 		{ '2', '2' },
 	[_KBD_PGDN_2] =
 		{ '3', '3' },
-
+	[_KBD_EQUALS_2] =
+		{ '=', '=' },
 	[_KBD_INS_2] =
 		{ '0', '0' },
-
+	[_KBD_COMMA_2] =
+		{ ',', ',' },
 	[_KBD_DEL_2] =
 		{ '.', '.' },
 
-	[_KBD_ESCAPE] =
-		{ '\33', '\33' },
+#if MACHINE_IBMPC88VA
+	[_KBD_ENTER_2] =
+		{ '\n', '\n' },
+#endif
 };
 
 #define PS2_SCANCODE_LSHIFT _KBD_SHIFT
