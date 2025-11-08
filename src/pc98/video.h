@@ -64,11 +64,24 @@ static inline void screen_scroll(int count)
 
 static inline void screen_video_move_cursor(void)
 {
-	// TODO
+	uint16_t location = screen_y * SCREEN_WIDTH + screen_x;
+	outb(0x62, 0x49); // cursor position specify
+	outb(0x60, location & 0xFF);
+	outb(0x60, location >> 8);
+}
+
+static inline void screen_video_set_cursor_size(int start, int end)
+{
+	outb(0x62, 0x4B); // cursor & character characteristics
+	outb(0x60, 0x8F); // display cursor (0x80), 15 lines per character row
+	outb(0x60, 0x00 | (start & 0x1F)); // rrBttttt (top, blink, rate.low)
+	outb(0x60, 0x0A | ((end & 0x1F) << 3)); // bbbbbrrr (rate.high, bottom)
 }
 
 static inline void screen_init(void)
 {
+	screen_video_set_cursor_size(0, 15);
+
 #if MODE_REAL && __ia16__
 	screen_buffer = (unsigned short far *)0xA0000000;
 #elif MODE_PROTECTED && __ia16__
@@ -86,6 +99,8 @@ static inline void screen_init(void)
 	{
 		screen_buffer[offset] = screen_attribute;
 	}
+
+	screen_video_move_cursor();
 }
 
 #endif // _VIDEO_H
