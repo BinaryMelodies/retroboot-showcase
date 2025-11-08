@@ -4,6 +4,9 @@ typedef struct registers_t registers_t;
 #if !MACHINE_AMIGA && !MACHINE_MACINTOSH // TODO
 #include "keyboard.c"
 #endif
+#if !MACHINE_AMIGA && !MACHINE_MACINTOSH // TODO
+#include "timer.c"
+#endif
 
 # define DEFINE_ISR(__hex) \
 void isr##__hex(void); \
@@ -320,16 +323,11 @@ void interrupt_handler(registers_t * registers)
 
 	switch(registers->interrupt_number)
 	{
-#if 0
-	case IRQ0 + 0: // timer interrupt
+#ifdef IRQ_TIMER
+	case IRQ_TIMER:
 		timer_interrupt_handler(registers);
 		break;
 #endif
-/*#if MACHINE_X68000
-	case 0x45:
-		// TODO: timer needs to be handled
-		break;
-#endif*/
 #ifdef IRQ_KEYBOARD
 	case IRQ_KEYBOARD:
 		keyboard_interrupt_handler(registers);
@@ -348,7 +346,7 @@ static inline void setup_tables(void)
 {
 #if MACHINE_X68000
 	// TODO: make this more general
-//	set_interrupt(0x45, isr0x45); // timer
+	set_interrupt(0x45, isr0x45); // timer
 	set_interrupt(0x4C, isr0x4C); // keyboard
 #else
 #if MACHINE_ATARI
