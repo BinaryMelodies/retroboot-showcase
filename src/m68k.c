@@ -325,6 +325,11 @@ void interrupt_handler(registers_t * registers)
 		timer_interrupt_handler(registers);
 		break;
 #endif
+/*#if MACHINE_X68000
+	case 0x45:
+		// TODO: timer needs to be handled
+		break;
+#endif*/
 #ifdef IRQ_KEYBOARD
 	case IRQ_KEYBOARD:
 		keyboard_interrupt_handler(registers);
@@ -343,18 +348,16 @@ static inline void setup_tables(void)
 {
 #if MACHINE_X68000
 	// TODO: make this more general
-	set_interrupt(0x45, isr0x45);
-	set_interrupt(0x4C, isr0x4C);
+//	set_interrupt(0x45, isr0x45); // timer
+	set_interrupt(0x4C, isr0x4C); // keyboard
 #else
 #if MACHINE_ATARI
 	acia.control = 3; // reset
 	acia.control = 0x96;
 #endif
 
-/*
-	set_interrupt(0x00, isr0x00);
-	set_interrupt(0x01, isr0x01);
-*/
+	/* set_interrupt(0x00, isr0x00); */ // not an interrupt: holds SSP value after reset
+	/* set_interrupt(0x01, isr0x01); */ // not an interrupt: holds PC  value after reset
 	set_interrupt(0x02, isr0x02);
 	set_interrupt(0x03, isr0x03);
 	set_interrupt(0x04, isr0x04);

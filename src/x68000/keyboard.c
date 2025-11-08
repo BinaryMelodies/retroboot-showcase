@@ -1,4 +1,6 @@
 
+#define USART_DATA_REGISTER (*(uint8_t *)0xE8802F)
+
 #include "../pc86/scancode.c"
 #include "../pc86/keyproc.c"
 
@@ -8,7 +10,7 @@ static inline void keyboard_interrupt_handler(registers_t * registers)
 {
 	(void) registers;
 
-	uint8_t scancode = *(uint8_t *)0xE8802F;
+	uint8_t scancode = USART_DATA_REGISTER;
 
 	if(scancode != 0xFF)
 	{

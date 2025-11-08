@@ -286,7 +286,7 @@ noreturn void kmain(void)
 
 	screen_init();
 
-	test_scroll();
+//	test_scroll();
 
 	screen_putstr("Greetings! " OSNAME " for " SYSNAME COMMENT "\n");
 
