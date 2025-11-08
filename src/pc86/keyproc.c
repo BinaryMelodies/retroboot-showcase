@@ -1,4 +1,8 @@
 
+#if MACHINE_IBMPC
+static bool keyboard_extended_key;
+#endif
+
 static inline void keyboard_interrupt_process(uint8_t scancode)
 {
 	if((scancode & PS2_SCANCODE_RELEASED) == 0)
@@ -11,7 +15,12 @@ static inline void keyboard_interrupt_process(uint8_t scancode)
 		}
 		else
 		{
-			int c = keyboard_shift ? keyboard_scancode_table[scancode].shifted : keyboard_scancode_table[scancode].normal;
+			int vscancode = scancode;
+#if MACHINE_IBMPC
+			if(keyboard_extended_key)
+				vscancode += __KBD_EXTENDED_FLAG;
+#endif
+			int c = keyboard_shift ? keyboard_scancode_table[vscancode].shifted : keyboard_scancode_table[vscancode].normal;
 			keyboard_buffer_push(c);
 		}
 	}
@@ -24,5 +33,9 @@ static inline void keyboard_interrupt_process(uint8_t scancode)
 			keyboard_shift = false;
 		}
 	}
+
+#if MACHINE_IBMPC
+	keyboard_extended_key = (scancode == _KBD_EXTENDED_PREFIX);
+#endif
 }
 
