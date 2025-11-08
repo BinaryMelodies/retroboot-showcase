@@ -7,7 +7,8 @@ static inline void timer_interrupt_handler(registers_t * registers)
 {
 	(void) registers;
 
-	// TODO: needs processing, otherwise no more ticks will arrive
+	// clear interrupt service bit
+	*(uint8_t *)0xFFFFFA11 = 0xDF;
 
 	timer_tick ++;
 

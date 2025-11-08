@@ -315,7 +315,7 @@ void interrupt_handler(registers_t * registers)
 	screen_y = SCREEN_HEIGHT - 1;
 	screen_attribute = SCREEN_ATTR_CGA_FG_YELLOW | SCREEN_ATTR_CGA_BG_RED;
 
-#if MACHINE_X68000 // TODO: these instructions break resuming the interrupt
+#if MACHINE_ATARI || MACHINE_X68000 // TODO: these instructions break resuming the interrupt
 if(registers->interrupt_number != IRQ_TIMER)
 #endif
 {
